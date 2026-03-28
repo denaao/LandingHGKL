@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Game KING Live — 3ª Etapa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #f5c800;
+      --yellow-dark: #c9a200;
+      --green: #080808;
+      --green-mid: #050505;
+      --green-dark: #080808;
+      --green-felt: #0a0a0a;
+      --black: #080808;
+      --surface: rgba(0,0,0,0.55);
+      --surface2: rgba(0,0,0,0.75);
+      --border: rgba(245,200,0,0.25);
+      --text: #f5f0e8;
+      --text-muted: rgba(245,240,232,0.6);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--green-dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* subtle noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse 100% 60% at 50% 0%, rgba(245,200,0,.04) 0%, transparent 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: .9rem 6%;
+      background: rgba(5,5,5,0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 2px solid var(--yellow);
+    }
+
+    .nav-logo {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+    .nav-logo-top {
+      font-family: 'Dancing Script', cursive;
+      font-size: .9rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .nav-logo-bottom {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--yellow); }
+    .nav-cta {
+      background: var(--yellow) !important;
+      color: #000 !important;
+      padding: .5rem 1.4rem;
+      border-radius: 3px;
+      font-weight: 700 !important;
+    }
+    .nav-cta:hover { background: #fff !important; }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 5rem 6% 3rem;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(245,200,0,.07) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 40% at 50% 100%, rgba(0,0,0,0.5) 0%, transparent 70%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* logo */
+    .hero-logo {
+      width: clamp(280px, 55vw, 520px);
+      height: auto;
+      filter: drop-shadow(0 8px 40px rgba(0,0,0,.7));
+      margin-bottom: .5rem;
+    }
+
+    /* app download buttons */
+    .app-buttons {
+      display: flex;
+      gap: .75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .app-btn {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      background: #000;
+      border: 1px solid rgba(245,200,0,.4);
+      border-radius: 8px;
+      padding: .6rem 1.2rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color .2s, transform .2s;
+      min-width: 150px;
+    }
+    .app-btn:hover { border-color: var(--yellow); transform: translateY(-2px); }
+
+    .app-btn-text { display: flex; flex-direction: column; line-height: 1.2; }
+    .app-btn-sub { font-size: .6rem; color: var(--text-muted); letter-spacing: .5px; }
+    .app-btn-name { font-family: 'Oswald', sans-serif; font-size: .95rem; font-weight: 600; color: var(--yellow); }
+
+    /* tagline */
+    .hero-tagline {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .hero-tagline-main {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      text-shadow: 0 0 20px rgba(245,200,0,.4);
+    }
+    .hero-tagline-sub {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--text-muted);
+      margin-top: .2rem;
+    }
+
+    /* divider line */
+    .hero-divider {
+      width: 60px;
+      height: 2px;
+      background: var(--yellow);
+      margin: 0 auto 1.5rem;
+      opacity: .6;
+    }
+
+    /* local pill */
+    .hero-local {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      margin-bottom: 2rem;
+    }
+    .hero-local-venue {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .hero-local-addr {
+      font-size: .85rem;
+      color: var(--text-muted);
+      letter-spacing: .5px;
+    }
+
+    /* dates strip */
+    .hero-dates {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-date-pill {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(0,0,0,.5);
+      border: 1px solid rgba(245,200,0,.3);
+      border-radius: 40px;
+      padding: .45rem 1.1rem;
+    }
+    .hero-date-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--yellow);
+    }
+    .hero-date-day {
+      font-size: .72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .hero-date-sep {
+      color: rgba(245,200,0,.3);
+      font-size: 1.2rem;
+    }
+
+    /* countdown */
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .cd-block { text-align: center; }
+    .cd-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      color: var(--yellow);
+      line-height: 1;
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(245,200,0,.25);
+      border-radius: 6px;
+      padding: .4rem .8rem;
+      min-width: 64px;
+      display: block;
+      text-shadow: 0 0 20px rgba(245,200,0,.4);
+    }
+    .cd-label { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: .3rem; }
+    .cd-sep { font-size: 2rem; color: rgba(245,200,0,.35); align-self: flex-start; margin-top: .5rem; }
+
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn-primary {
+      background: var(--yellow);
+      color: #000;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: .85rem 2.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,200,0,.4); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: .85rem 2.5rem;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-outline:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── SECTIONS COMMON ── */
+    section { padding: 6rem 6%; }
+
+    .section-tag {
+      display: inline-block;
+      background: var(--yellow);
+      color: #000;
+      font-family: 'Oswald', sans-serif;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      padding: .3rem .9rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .section-title span { color: var(--yellow); }
+
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 540px;
+      margin-bottom: 3rem;
+      font-size: .9rem;
+    }
+
+    /* ── GAMES ── */
+    #games { background: rgba(255,255,255,.02); }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .game-card {
+      background: var(--surface2);
+      border: 1px solid rgba(245,200,0,.2);
+      border-radius: 6px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .25s;
+    }
+    .game-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--yellow);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .3s;
+    }
+    .game-card:hover { border-color: var(--yellow); transform: translateY(-4px); }
+    .game-card:hover::after { transform: scaleX(1); }
+
+    .game-suit { font-size: 2.2rem; margin-bottom: .75rem; line-height: 1; }
+    .suit-red { color: #e74c3c; }
+    .suit-black { color: var(--text); }
+
+    .game-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--yellow);
+      margin-bottom: .4rem;
+    }
+    .game-desc { font-size: .82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5; }
+
+    .game-info { border-top: 1px solid rgba(255,255,255,.08); padding-top: .9rem; display: flex; flex-direction: column; gap: .35rem; }
+    .game-row { display: flex; justify-content: space-between; font-size: .8rem; }
+    .gk { color: var(--text-muted); }
+    .gv { color: var(--text); font-weight: 500; }
+    .gv-yellow { color: var(--yellow); font-weight: 700; }
+
+    .g-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: .3rem .5rem;
+      border-radius: 3px;
+      margin-bottom: .6rem;
+      width: 72px;
+      height: 24px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .gb-y  { background: rgba(245,200,0,.15);  color: var(--yellow);  border: 1px solid rgba(245,200,0,.35); }
+    .gb-r  { background: rgba(231,76,60,.15);   color: #e74c3c;        border: 1px solid rgba(231,76,60,.35); }
+    .gb-w  { background: rgba(245,200,0,.15);   color: var(--yellow);  border: 1px solid rgba(245,200,0,.35); }
+    .gb-g  { background: rgba(39,174,96,.15);   color: #27ae60;        border: 1px solid rgba(39,174,96,.35); }
+
+    /* ── TABELAS DE PONTUAÇÃO ── */
+    .score-tables-bar {
+      display: flex; flex-wrap: wrap; gap: .75rem;
+      justify-content: center; margin-bottom: 2rem;
+    }
+    .score-tables-bar button {
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: .6rem 1.4rem;
+      border: 1px solid rgba(245,200,0,.4);
+      border-radius: 6px;
+      background: rgba(245,200,0,.08);
+      color: var(--yellow);
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .score-tables-bar button:hover,
+    .score-tables-bar button.active {
+      background: rgba(245,200,0,.2);
+      border-color: var(--yellow);
+    }
+    .score-panel {
+      display: none;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(245,200,0,.2);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(0,0,0,.25);
+    }
+    .score-panel.visible { display: block; }
+    .score-panel table { min-width: 0 !important; }
+    .score-panel th { font-size: .7rem; }
+    .score-panel td { font-size: .8rem; padding: .35rem .75rem; }
+    .score-panel td:first-child { color: var(--yellow); font-weight: 600; }
+    .score-panel td:last-child { text-align: right; }
+
+    /* ── RANKING ── */
+    #ranking { background: transparent; }
+
+    .ranking-wrapper { overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+
+    thead tr { border-bottom: 2px solid var(--yellow); }
+    th {
+      text-align: left;
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      padding: .5rem .75rem;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      transition: background .15s;
+    }
+    tbody tr:hover { background: rgba(245,200,0,.05); }
+    td { padding: .4rem .75rem; font-size: .875rem; }
+
+    .rank-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .rank-1 .rank-num { color: var(--yellow); text-shadow: 0 0 12px rgba(245,200,0,.6); }
+    .rank-2 .rank-num { color: #c0c0c0; }
+    .rank-3 .rank-num { color: #cd7f32; }
+
+    .player-info { display: flex; align-items: center; gap: .75rem; }
+    .avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .8rem;
+      flex-shrink: 0;
+      border: 2px solid transparent;
+    }
+    .rank-1 .avatar { border-color: var(--yellow); }
+
+    .player-name { font-weight: 600; font-size: .875rem; }
+    .player-city { font-size: .72rem; color: var(--text-muted); }
+
+    .prize { font-weight: 700; color: var(--yellow); }
+
+    .bar-wrap { display: flex; align-items: center; gap: .6rem; }
+    .bar { flex: 1; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
+    .bar-fill { height: 100%; background: linear-gradient(90deg, var(--yellow), #fff9); border-radius: 2px; }
+
+    /* ── LOCATION ── */
+    #location { background: rgba(255,255,255,.02); }
+
+    .location-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .detail-list { display: flex; flex-direction: column; gap: 1.25rem; }
+    .detail-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .detail-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      width: 40px; height: 40px;
+      background: rgba(245,200,0,.1);
+      border: 1px solid rgba(245,200,0,.3);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .detail-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: .7rem;
+      color: var(--yellow);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: .15rem;
+    }
+    .detail-value { font-size: .9rem; line-height: 1.5; color: var(--text); }
+    .detail-value strong { color: var(--yellow); }
+
+    .map-box {
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid rgba(245,200,0,.3);
+      aspect-ratio: 4/3;
+    }
+    .map-box iframe { width: 100%; height: 100%; border: none; filter: saturate(.4) brightness(.7); }
+
+    /* ── CONTACT ── */
+    #contact { background: transparent; }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .contact-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-card {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      padding: 1.1rem 1.25rem;
+      background: var(--surface2);
+      border: 1px solid rgba(245,200,0,.15);
+      border-radius: 5px;
+      transition: border-color .2s;
+    }
+    .contact-card:hover { border-color: rgba(245,200,0,.5); }
+    .cc-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .cc-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: .7rem;
+      font-weight: 600;
+      color: var(--yellow);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: .15rem;
+    }
+    .cc-value { font-size: .875rem; color: var(--text-muted); }
+
+    form { display: flex; flex-direction: column; gap: .9rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .form-group { display: flex; flex-direction: column; gap: .35rem; }
+
+    label {
+      font-size: .72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      background: rgba(0,0,0,.6);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 4px;
+      padding: .75rem 1rem;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .875rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--yellow); }
+    input::placeholder, textarea::placeholder { color: rgba(255,255,255,.25); }
+    select option { background: #111; }
+    textarea { resize: vertical; min-height: 110px; }
+
+    .toast {
+      display: none;
+      background: rgba(39,174,96,.15);
+      border: 1px solid rgba(39,174,96,.4);
+      color: #2ecc71;
+      padding: .75rem 1rem;
+      border-radius: 4px;
+      font-size: .85rem;
+      text-align: center;
+    }
+
+    /* ── ONLINE ── */
+    #online {
+      background: rgba(245,200,0,.04);
+      border-top: 1px solid rgba(245,200,0,.15);
+      border-bottom: 1px solid rgba(245,200,0,.15);
+    }
+
+    .online-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .online-img-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .online-img {
+      width: 100%;
+      max-width: 380px;
+      height: auto;
+      filter: drop-shadow(0 12px 40px rgba(245,200,0,.2));
+      animation: floatImg 4s ease-in-out infinite;
+    }
+
+    @keyframes floatImg {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .online-content { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .online-desc {
+      color: var(--text-muted);
+      font-size: .95rem;
+      line-height: 1.7;
+    }
+    .online-desc strong { color: var(--yellow); }
+
+    .online-ids {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .online-id-card {
+      background: var(--surface2);
+      border: 1px solid rgba(245,200,0,.25);
+      border-radius: 6px;
+      padding: .9rem 1.5rem;
+      text-align: center;
+      min-width: 130px;
+    }
+
+    .online-id-label {
+      font-size: .7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: .3rem;
+    }
+
+    .online-id-val {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--yellow);
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .online-inner { grid-template-columns: 1fr; text-align: center; }
+      .online-ids { justify-content: center; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: rgba(0,0,0,.7);
+      border-top: 2px solid var(--yellow);
+      padding: 1.75rem 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .footer-copy { font-size: .75rem; color: var(--text-muted); }
+    .footer-suits { font-size: 1.1rem; letter-spacing: .6rem; color: rgba(245,200,0,.3); }
+
+    /* ── BATALHA HG ── */
+    #batalha-hg { background: rgba(255,255,255,.02); }
+
+    .hg-table { max-width: 520px; }
+
+    /* ── SCHEDULE ── */
+    .sched-day { margin-bottom: 3rem; }
+
+    .sched-day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: .75rem;
+      border-bottom: 2px solid var(--yellow);
+    }
+    .sched-day-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--yellow);
+    }
+    .sched-day-date {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    .sched-events {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+
+    .sched-event { display: flex; gap: 1rem; align-items: stretch; }
+
+    .sched-time {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--yellow);
+      background: rgba(245,200,0,.1);
+      border: 1px solid rgba(245,200,0,.3);
+      border-radius: 4px;
+      padding: .35rem .7rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+      padding-top: 1.25rem;
+    }
+
+    .sched-card {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid rgba(245,200,0,.15);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      transition: border-color .2s;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .sched-card:hover { border-color: rgba(245,200,0,.45); }
+
+    .sched-card-highlight {
+      border-color: rgba(231,76,60,.4) !important;
+      background: rgba(231,76,60,.06) !important;
+    }
+    .sched-card-highlight:hover { border-color: rgba(231,76,60,.7) !important; }
+
+    .sched-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: .9rem;
+    }
+    .sched-num {
+      font-size: .7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: .2rem;
+    }
+    .sched-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .sched-sub {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: .2rem;
+    }
+
+    .sched-info { display: flex; flex-direction: column; gap: .35rem; border-top: 1px solid rgba(255,255,255,.07); padding-top: .8rem; flex: 1; }
+    .sched-row { display: flex; justify-content: space-between; font-size: .8rem; gap: .5rem; flex-wrap: wrap; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: rgba(5,20,5,.98); border-bottom: 2px solid var(--yellow); padding: 1.5rem 6%; gap: 1rem; }
+      .nav-links.open { display: flex; }
+      .hamburger { display: flex; }
+      .location-grid, .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <span class="nav-logo-top">home game</span>
+    <span class="nav-logo-bottom">King Live</span>
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#games">Jogos</a></li>
+    <li><a href="#ranking">Ranking</a></li>
+    <li><a href="#batalha-hg">Batalha HG</a></li>
+    <li><a href="#location">Local</a></li>
+    <li><a href="#contact">Contato</a></li>
+    <li><a href="https://www.instagram.com/king_poker_online" target="_blank" rel="noopener" class="nav-cta"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Siga-nos no Instagram</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+
+    <!-- logo -->
+    <img src="1 - logo.png" alt="Home Game King Live" class="hero-logo" />
+
+    <!-- download buttons -->
+    <div class="hero-tagline">
+      <div class="hero-tagline-main">Vem a&iacute; a 3&ordf; Etapa</div>
+      <div class="hero-tagline-sub">Esteja preparado!</div>
+    </div>
+
+    <div class="hero-divider"></div>
+
+    <!-- datas -->
+    <div class="hero-dates">
+      <div class="hero-date-pill">
+        <span class="hero-date-num">23</span>
+        <span class="hero-date-day">Quinta<br/>Abr</span>
+      </div>
+      <div class="hero-date-sep">/</div>
+      <div class="hero-date-pill">
+        <span class="hero-date-num">24</span>
+        <span class="hero-date-day">Sexta<br/>Abr</span>
+      </div>
+      <div class="hero-date-sep">/</div>
+      <div class="hero-date-pill">
+        <span class="hero-date-num">25</span>
+        <span class="hero-date-day">S&aacute;bado<br/>Abr</span>
+      </div>
+    </div>
+
+    <!-- local -->
+    <div class="hero-local">
+      <div class="hero-local-venue">Espa&ccedil;o UNIK &mdash; Clube Cultura Art&iacute;stica de Campinas</div>
+      <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
+    </div>
+
+    <!-- countdown -->
+    <div class="countdown">
+      <div class="cd-block">
+        <span class="cd-num" id="cd-days">00</span>
+        <div class="cd-label">Dias</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block">
+        <span class="cd-num" id="cd-hours">00</span>
+        <div class="cd-label">Horas</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block">
+        <span class="cd-num" id="cd-mins">00</span>
+        <div class="cd-label">Min</div>
+      </div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block">
+        <span class="cd-num" id="cd-secs">00</span>
+        <div class="cd-label">Seg</div>
+      </div>
+    </div>
+
+    <!-- botões -->
+    <div class="hero-buttons">
+      <a href="#contact" class="btn-primary">Garantir Vaga</a>
+      <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- GAMES -->
+<section id="games">
+  <div class="section-tag">Programa&ccedil;&atilde;o</div>
+  <h2 class="section-title">Calend&aacute;rio de <span>Eventos</span></h2>
+  <p class="section-desc">
+    De 23 a 25 de abril &mdash; Clube de Cultura Art&iacute;stica de Campinas &mdash; Espa&ccedil;o UNIK<br />
+    Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP
+  </p>
+
+  <!-- DIA 1 -->
+  <div class="sched-day">
+    <div class="sched-day-header">
+      <div class="sched-day-label">Quinta</div>
+      <div class="sched-day-date">23 / 04</div>
+    </div>
+    <div class="sched-events">
+
+      <div class="sched-event">
+        <div class="sched-time">19h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">1&ordm; Evento</div>
+              <div class="sched-title">30K High Roller Business</div>
+              <div class="sched-sub">Dia &Uacute;nico</div>
+            </div>
+            <div class="g-badge gb-y" style="align-self:flex-start">Roller</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in</span><span class="gv-yellow">R$ 1.300 + 200</span></div>
+            <div class="sched-row"><span class="gk">Fichas</span><span class="gv">25K + 25K</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">30 min</span></div>
+            <div class="sched-row"><span class="gk">Late register</span><span class="gv">Final do 9&ordm; n&iacute;vel</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DIA 2 -->
+  <div class="sched-day">
+    <div class="sched-day-header">
+      <div class="sched-day-label">Sexta</div>
+      <div class="sched-day-date">24 / 04</div>
+    </div>
+    <div class="sched-events">
+
+      <div class="sched-event">
+        <div class="sched-time">19h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">2&ordm; Evento</div>
+              <div class="sched-title">60K Mystery Bounty</div>
+              <div class="sched-sub">Dia 1</div>
+            </div>
+            <div class="g-badge gb-r" style="align-self:flex-start">Bounty</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in Simples</span><span class="gv-yellow">R$ 130 + 20 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
+            <div class="sched-row"><span class="gk">Buy-in Duplo</span><span class="gv-yellow">R$ 260 + 40 &nbsp;|&nbsp; 20K + 15K fichas</span></div>
+            <div class="sched-row"><span class="gk">Addon</span><span class="gv">R$ 200 &nbsp;|&nbsp; 50K fichas</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">30/20 min</span></div>
+            <div class="sched-row"><span class="gk">Late register</span><span class="gv">23h50</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sched-event">
+        <div class="sched-time">23h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">3&ordm; Evento</div>
+              <div class="sched-title">Super 50</div>
+            </div>
+            <div class="g-badge gb-w" style="align-self:flex-start">Popular</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in Simples</span><span class="gv-yellow">R$ 40 + 10 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
+            <div class="sched-row"><span class="gk">Buy-in Duplo</span><span class="gv-yellow">R$ 80 + 20 &nbsp;|&nbsp; 20K + 15K fichas</span></div>
+            <div class="sched-row"><span class="gk">Addon</span><span class="gv">R$ 50 &nbsp;|&nbsp; 50K fichas</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">20/15 min</span></div>
+            <div class="sched-row"><span class="gk">Late register</span><span class="gv">2h00</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DIA 3 -->
+  <div class="sched-day">
+    <div class="sched-day-header">
+      <div class="sched-day-label">S&aacute;bado</div>
+      <div class="sched-day-date">25 / 04</div>
+    </div>
+    <div class="sched-events">
+
+      <div class="sched-event">
+        <div class="sched-time">17h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">5&ordm; Evento</div>
+              <div class="sched-title">Batalha de Home Game</div>
+              <div class="sched-sub">Equipes de 8 jogadores &mdash; Shout out / Freezeout</div>
+            </div>
+            <div class="g-badge gb-g" style="align-self:flex-start">Teams</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in</span><span class="gv-yellow">R$ 120 por jogador</span></div>
+            <div class="sched-row"><span class="gk">Fichas</span><span class="gv">25K por jogador</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">20 min</span></div>
+            <div class="sched-row"><span class="gk">Pontua&ccedil;&atilde;o</span><span class="gv">1&ordm; ao 8&ordm; por mesa &mdash; equipe com maior total &eacute; campe&atilde;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sched-event">
+        <div class="sched-time">19h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">4&ordm; Evento</div>
+              <div class="sched-title">5K Freeroll</div>
+            </div>
+            <div class="g-badge gb-g" style="align-self:flex-start">Free</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in</span><span class="gv-yellow">FREE &nbsp;|&nbsp; 5K fichas (at&eacute; o final do 1&ordm; n&iacute;vel)</span></div>
+            <div class="sched-row"><span class="gk">Rebuy Simples</span><span class="gv">R$ 20 + 10 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
+            <div class="sched-row"><span class="gk">Rebuy Duplo</span><span class="gv">R$ 40 + 20 &nbsp;|&nbsp; 20K + 10K fichas</span></div>
+            <div class="sched-row"><span class="gk">Addon</span><span class="gv">R$ 50 &nbsp;|&nbsp; 30K fichas</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">20/15 min</span></div>
+            <div class="sched-row"><span class="gk">Late register</span><span class="gv">20h00</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sched-event">
+        <div class="sched-time">19h</div>
+        <div class="sched-card sched-card-highlight">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">2&ordm; Evento &mdash; continua&ccedil;&atilde;o</div>
+              <div class="sched-title">60K Mystery Bounty</div>
+              <div class="sched-sub">&#127942; Mesa Final</div>
+            </div>
+            <div class="g-badge gb-r" style="align-self:flex-start">Final</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sched-event">
+        <div class="sched-time">22h</div>
+        <div class="sched-card">
+          <div class="sched-top">
+            <div>
+              <div class="sched-num">6&ordm; Evento</div>
+              <div class="sched-title">Super 50</div>
+            </div>
+            <div class="g-badge gb-w" style="align-self:flex-start">Popular</div>
+          </div>
+          <div class="sched-info">
+            <div class="sched-row"><span class="gk">Buy-in Simples</span><span class="gv-yellow">R$ 40 + 10 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
+            <div class="sched-row"><span class="gk">Buy-in Duplo</span><span class="gv-yellow">R$ 80 + 20 &nbsp;|&nbsp; 20K + 15K fichas</span></div>
+            <div class="sched-row"><span class="gk">Addon</span><span class="gv">R$ 50 &nbsp;|&nbsp; 50K fichas</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">20/15 min</span></div>
+            <div class="sched-row"><span class="gk">Late register</span><span class="gv">2h00</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<!-- RANKING -->
+<section id="ranking">
+  <div class="section-tag">Classifica&ccedil;&atilde;o</div>
+  <h2 class="section-title">Ranking de <span>Jogadores</span></h2>
+  <p class="section-desc">
+    Os maiores nomes confirmados para a 3&ordf; Etapa. Acompanhe a pontua&ccedil;&atilde;o
+    acumulada da temporada e o hist&oacute;rico de vit&oacute;rias.
+  </p>
+  <div class="score-tables-bar">
+    <button onclick="toggleScorePanel('panel-amarela')">Tabela Amarela</button>
+    <button onclick="toggleScorePanel('panel-highroller')">Tabela Roxa</button>
+    <button onclick="toggleScorePanel('panel-mainevent')">Tabela Verde</button>
+  </div>
+
+  <div id="panel-amarela" class="score-panel">
+    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
+      <tr><td>1&ordm;</td><td>80</td></tr><tr><td>2&ordm;</td><td>70</td></tr>
+      <tr><td>3&ordm;</td><td>60</td></tr><tr><td>4&ordm;</td><td>40</td></tr>
+      <tr><td>5&ordm;</td><td>34</td></tr><tr><td>6&ordm;</td><td>30</td></tr>
+      <tr><td>7&ordm;</td><td>26</td></tr><tr><td>8&ordm;-9&ordm;</td><td>22</td></tr>
+      <tr><td>10&ordm;-12&ordm;</td><td>18</td></tr>
+      <tr><td>13&ordm;-15&ordm;</td><td>16</td></tr>
+      <tr><td>16&ordm;-18&ordm;</td><td>14</td></tr>
+      <tr><td>19&ordm;-27&ordm;</td><td>12</td></tr>
+      <tr><td>28&ordm;-34&ordm;</td><td>10</td></tr>
+    </tbody></table>
+    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: Last Chance, Freeroll, Super 50</p>
+  </div>
+
+  <div id="panel-highroller" class="score-panel">
+    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
+      <tr><td>1&ordm;</td><td>160</td></tr><tr><td>2&ordm;</td><td>120</td></tr>
+      <tr><td>3&ordm;</td><td>90</td></tr><tr><td>4&ordm;</td><td>70</td></tr>
+      <tr><td>5&ordm;</td><td>60</td></tr><tr><td>6&ordm;</td><td>50</td></tr>
+      <tr><td>7&ordm;</td><td>40</td></tr><tr><td>8&ordm;</td><td>34</td></tr>
+      <tr><td>9&ordm;</td><td>30</td></tr><tr><td>10&ordm;</td><td>26</td></tr>
+      <tr><td>11&ordm;-12&ordm;</td><td>26</td></tr>
+      <tr><td>13&ordm;-15&ordm;</td><td>24</td></tr>
+      <tr><td>16&ordm;-18&ordm;</td><td>22</td></tr>
+      <tr><td>19&ordm;-34&ordm;</td><td>20</td></tr>
+    </tbody></table>
+    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: High Roller</p>
+  </div>
+
+  <div id="panel-mainevent" class="score-panel">
+    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
+      <tr><td>1&ordm;</td><td>200</td></tr><tr><td>2&ordm;</td><td>160</td></tr>
+      <tr><td>3&ordm;</td><td>130</td></tr><tr><td>4&ordm;</td><td>110</td></tr>
+      <tr><td>5&ordm;</td><td>100</td></tr><tr><td>6&ordm;</td><td>90</td></tr>
+      <tr><td>7&ordm;</td><td>80</td></tr><tr><td>8&ordm;</td><td>70</td></tr>
+      <tr><td>9&ordm;</td><td>60</td></tr><tr><td>10&ordm;-18&ordm;</td><td>40</td></tr>
+      <tr><td>19&ordm;-27&ordm;</td><td>34</td></tr>
+      <tr><td>28&ordm;-34&ordm;</td><td>30</td></tr>
+    </tbody></table>
+    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: Main Event</p>
+  </div>
+
+  <div class="ranking-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Pos.</th>
+          <th>Nome</th>
+          <th>Pontos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="3" style="color:#888">Carregando ranking real...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- BATALHA HG -->
+<section id="batalha-hg">
+  <div class="section-tag">Times</div>
+  <h2 class="section-title">Batalha de <span>Home Games</span></h2>
+  <p class="section-desc">Ranking por equipes — a equipe com maior pontua&ccedil;&atilde;o ao final &eacute; a campe&atilde;.</p>
+
+  <div class="ranking-wrapper">
+    <table class="hg-table">
+      <thead>
+        <tr>
+          <th>Pos.</th>
+          <th>Equipe</th>
+          <th>Pontos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="rank-1"><td><span class="rank-num">1</span></td><td><span class="player-name">Esporte da Mente</span></td><td class="prize">253</td></tr>
+        <tr class="rank-2"><td><span class="rank-num">2</span></td><td><span class="player-name">Garagentos</span></td><td class="prize">244</td></tr>
+        <tr class="rank-3"><td><span class="rank-num">3</span></td><td><span class="player-name">Arena Poker</span></td><td class="prize">204</td></tr>
+        <tr><td><span class="rank-num">4</span></td><td>Pesadelo</td><td>200</td></tr>
+        <tr><td><span class="rank-num">5</span></td><td>Suprema</td><td>192</td></tr>
+        <tr><td><span class="rank-num">6</span></td><td>Marc&atilde;o 42 Poker Team</td><td>170</td></tr>
+        <tr><td><span class="rank-num">7</span></td><td>Poker Bar&atilde;o</td><td>160</td></tr>
+        <tr><td><span class="rank-num">8</span></td><td>Leva o Restinho Team</td><td>159</td></tr>
+        <tr><td><span class="rank-num">9</span></td><td>Call por Blefe</td><td>127</td></tr>
+        <tr><td><span class="rank-num">10</span></td><td>Business Poker</td><td>115</td></tr>
+        <tr><td><span class="rank-num">11</span></td><td>Crazy Nuts</td><td>110</td></tr>
+        <tr><td><span class="rank-num">12</span></td><td>Paga o Careca</td><td>100</td></tr>
+        <tr><td><span class="rank-num">13</span></td><td>De Tudo um Poker</td><td>77</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- LOCATION -->
+<section id="location">
+  <div class="section-tag">Localiza&ccedil;&atilde;o</div>
+  <h2 class="section-title">Onde <span>Acontece</span></h2>
+  <p class="section-desc">
+    Estrutura exclusiva para o maior home game do interior. Ambiente premium,
+    seguran&ccedil;a total e toda a infraestrutura para os melhores jogadores.
+  </p>
+  <div class="location-grid">
+    <div class="detail-list">
+      <div class="detail-item">
+        <div class="detail-icon">&#127968;</div>
+        <div>
+          <div class="detail-label">Venue</div>
+          <div class="detail-value">Clube Semanal de Cultura Art&iacute;stica de Campinas<br />Espa&ccedil;o UNIK</div>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">&#128205;</div>
+        <div>
+          <div class="detail-label">Endere&ccedil;o</div>
+          <div class="detail-value">Rod. Heitor Penteado, km 6<br />Souzas &mdash; Campinas &mdash; SP</div>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">&#128197;</div>
+        <div>
+          <div class="detail-label">Datas</div>
+          <div class="detail-value">23, 24 e 25 de Abril de 2026<br />Das 10h &agrave;s 02h (hor&aacute;rio de Bras&iacute;lia)</div>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">&#128661;</div>
+        <div>
+          <div class="detail-label">Acesso</div>
+          <div class="detail-value">Acesso pela Rod. Heitor Penteado sentido Souzas<br />Estacionamento gratuito no local</div>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-icon">
+          <svg viewBox="0 0 40 40" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="20" cy="20" r="18" fill="#b8860b" stroke="#ffd700" stroke-width="2"/>
+            <circle cx="20" cy="20" r="13" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-dasharray="4 3"/>
+            <circle cx="20" cy="20" r="7" fill="#c9a200"/>
+            <text x="20" y="24" text-anchor="middle" font-size="8" font-weight="bold" fill="#fff" font-family="Oswald,sans-serif">K</text>
+          </svg>
+        </div>
+        <div>
+          <div class="detail-label">Jogue Tamb&eacute;m Online</div>
+          <div class="detail-value">APP Suprema &mdash; King Online<br />Clube: <strong>747043</strong> &nbsp;|&nbsp; Agente: <strong>306618</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="map-box">
+      <iframe
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-47.0400%2C-22.8450%2C-47.0000%2C-22.8150&layer=mapnik&marker=-22.8300%2C-47.0200"
+        title="Mapa do evento"
+        loading="lazy"
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-tag">Inscri&ccedil;&otilde;es</div>
+  <h2 class="section-title">Garanta sua <span>Vaga</span></h2>
+  <p class="section-desc">
+    Vagas limitadas. Preencha o formul&aacute;rio e nossa equipe entrar&aacute; em contato
+    para confirmar sua inscri&ccedil;&atilde;o e orientar sobre pagamento.
+  </p>
+  <div class="contact-grid">
+    <div class="contact-cards">
+      <div class="contact-card">
+        <div class="cc-icon">&#128222;</div>
+        <div>
+          <div class="cc-label">Telefone</div>
+          <div class="cc-value">+55 (19) 97403-0622</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">&#128140;</div>
+        <div>
+          <div class="cc-label">E-mail</div>
+          <div class="cc-value">kingpokercps@gmail.com<br />Resposta em at&eacute; 24h</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">&#128172;</div>
+        <div>
+          <div class="cc-label">WhatsApp</div>
+          <div class="cc-value">+55 (19) 97403-0622</div>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="cc-icon">&#128081;</div>
+        <div>
+          <div class="cc-label">King Online</div>
+          <div class="cc-value">ID Clube: <strong style="color:var(--yellow)">747043</strong> &nbsp;|&nbsp; ID Agente: <strong style="color:var(--yellow)">306618</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <form id="contactForm" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nome completo *</label>
+          <input type="text" id="name" placeholder="Seu nome" required />
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail *</label>
+          <input type="email" id="email" placeholder="seu@email.com" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Telefone / WhatsApp</label>
+          <input type="tel" id="phone" placeholder="(11) 9 0000-0000" />
+        </div>
+        <div class="form-group">
+          <label for="game">Modalidade de interesse *</label>
+          <select id="game" required>
+            <option value="">Selecione...</option>
+            <option>Texas Hold'em &mdash; Main Event</option>
+            <option>PLO &mdash; Pot Limit Omaha</option>
+            <option>Short Deck Hold'em</option>
+            <option>Sit &amp; Go &mdash; Sat&eacute;lite</option>
+            <option>Mixed Games (H.O.R.S.E)</option>
+            <option>Open Face Chinese Poker</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="message">Mensagem ou d&uacute;vidas</label>
+        <textarea id="message" placeholder="Alguma d&uacute;vida ou observa&ccedil;&atilde;o?"></textarea>
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;font-size:1rem">
+        &#128081; Enviar Inscri&ccedil;&atilde;o
+      </button>
+      <div class="toast" id="toast">
+        &#10003; Inscri&ccedil;&atilde;o enviada! Entraremos em contato em breve.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ONLINE -->
+<section id="online">
+  <div class="online-inner">
+    <div class="online-img-wrap">
+      <div>
+        <img src="poker-online.png" alt="Jogue Online" class="online-img" />
+        <div class="app-buttons" style="margin-top:1.25rem">
+          <a href="https://play.google.com/store/apps/details?id=com.suprema.poker" target="_blank" rel="noopener" class="app-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.3.17.64.24.99.2l12.6-11.6-2.93-2.93-10.66 14.33zm16.34-10.54L16.8 11.5l-2.2 2.02 2.2 2.02 2.76-1.6a.96.96 0 0 0 0-1.72zM3.27.24A.97.97 0 0 0 3 .98v22.04l11.67-10.74L3.27.24zM4.17.04L16.8 6.5 13.87 9.43 4.17.04z"/></svg>
+            <div class="app-btn-text">
+              <span class="app-btn-sub">Dispon&iacute;vel no</span>
+              <span class="app-btn-name">Google Play</span>
+            </div>
+          </a>
+          <a href="https://apps.apple.com/app/suprema-poker/id1498694847" target="_blank" rel="noopener" class="app-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            <div class="app-btn-text">
+              <span class="app-btn-sub">Baixar na</span>
+              <span class="app-btn-name">App Store</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="online-content">
+      <div class="section-tag">Jogue Online</div>
+      <h2 class="section-title">Jogue com a gente <span>online</span></h2>
+      <p class="online-desc">
+        Al&eacute;m do torneio presencial, voc&ecirc; pode jogar conosco a qualquer hora pelo
+        <strong>APP Suprema Poker</strong>. Acesse nosso clube e divirta-se com os melhores jogadores.
+      </p>
+      <div class="online-ids">
+        <div class="online-id-card">
+          <div class="online-id-label">ID do Clube</div>
+          <div class="online-id-val">747043</div>
+        </div>
+        <div class="online-id-card">
+          <div class="online-id-label">ID do Agente</div>
+          <div class="online-id-val">306618</div>
+        </div>
+      </div>
+      <a href="https://www.instagram.com/king_poker_online" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;gap:.5rem;text-decoration:none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Siga @king_poker_online
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">&#128081; Home Game King Live</div>
+  <div class="footer-suits">&#9824; &#9829; &#9827; &#9830;</div>
+  <div class="footer-copy">&copy; 2026 King Live &mdash; Todos os direitos reservados.</div>
+</footer>
+
+<script>
+  // hamburger
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // countdown to 23 Abr 2025 10:00 BRT = UTC-3
+  const target = new Date('2026-04-23T22:00:00Z');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const diff = target - new Date();
+    if (diff <= 0) {
+      ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
+        document.getElementById(id).textContent = '00';
+      });
+      return;
+    }
+    document.getElementById('cd-days').textContent  = pad(Math.floor(diff / 86400000));
+    document.getElementById('cd-hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('cd-mins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('cd-secs').textContent  = pad(Math.floor((diff % 60000) / 1000));
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  // nav opacity on scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').style.background =
+      window.scrollY > 50 ? 'rgba(3,3,3,0.99)' : 'rgba(5,5,5,0.95)';
+  });
+
+  // smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('navLinks').classList.remove('open');
+      const el = document.querySelector(a.getAttribute('href'));
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // form
+  document.getElementById('contactForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (['name','email','game'].some(id => !document.getElementById(id).value.trim())) {
+      alert('Preencha todos os campos obrigat\u00f3rios (*).');
+      return;
+    }
+    const btn = this.querySelector('button[type=submit]');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = '\u{1F451} Inscri\u00e7\u00e3o Enviada \u2713';
+      btn.style.background = 'linear-gradient(135deg,#27ae60,#1e8449)';
+      btn.style.color = '#fff';
+      document.getElementById('toast').style.display = 'block';
+      this.reset();
+    }, 1200);
+  });
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function createDetailsHtml(player) {
+    const etapas = Array.isArray(player.etapas) ? player.etapas : [];
+    if (etapas.length === 0) {
+      return '<div style="color:#888">Sem dados detalhados para este jogador.</div>';
+    }
+
+    const etapasHtml = etapas.map((etapa, etapaIndex) => {
+      const panelId = `etapa-${player.__safeId}-${etapaIndex}`;
+      const torneios = Array.isArray(etapa.torneios) ? etapa.torneios : [];
+      const torneiosHtml = torneios.length
+        ? torneios.map((t) => `
+            <li>
+              <b>${escapeHtml(t.nome)}:</b>
+              <span style="color:var(--yellow)">${Number(t.pontos || 0)} pts</span>
+              <span style="color:#888">(Posição: ${Number(t.pos || 0)}º)</span>
+            </li>
+          `).join('')
+        : '<li style="color:#888">Sem torneios nesta etapa.</li>';
+
+      return `
+        <li style="margin-bottom:6px">
+          <span class="etapa-toggle" data-panel-id="${panelId}" style="cursor:pointer;font-weight:600;color:var(--yellow)">
+            ${escapeHtml(etapa.nome)}:
+          </span>
+          <span style="font-weight:600"> ${Number(etapa.pontos || 0)} pts</span>
+          <div class="torneios-list" id="${panelId}" style="display:none;margin-left:16px;margin-top:4px">
+            <b>Torneios:</b>
+            <ul style="margin:6px 0 0 0;">${torneiosHtml}</ul>
+          </div>
+        </li>
+      `;
+    }).join('');
+
+    return `<b>Pontuação por etapa:</b><ul style="margin:8px 0 0 0;">${etapasHtml}</ul>`;
+  }
+
+  function bindRankingInteractions() {
+    const rankingSection = document.getElementById('ranking');
+
+    rankingSection.querySelectorAll('.player-name').forEach((el) => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function() {
+        const playerId = this.getAttribute('data-player-id');
+        const detailsRow = rankingSection.querySelector(`.player-details-row[data-player-id="${playerId}"]`);
+        if (!detailsRow) return;
+
+        rankingSection.querySelectorAll('.player-details-row').forEach((row) => {
+          if (row !== detailsRow) row.style.display = 'none';
+        });
+
+        detailsRow.style.display = detailsRow.style.display === 'none' ? '' : 'none';
+      });
+    });
+
+    rankingSection.querySelectorAll('.etapa-toggle').forEach((el) => {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const panelId = this.getAttribute('data-panel-id');
+        const detailsContainer = this.closest('.player-details-row');
+        if (!detailsContainer) return;
+
+        const target = detailsContainer.querySelector(`#${panelId}`);
+        if (!target) return;
+
+        detailsContainer.querySelectorAll('.torneios-list').forEach((panel) => {
+          if (panel !== target) panel.style.display = 'none';
+        });
+
+        target.style.display = target.style.display === 'none' ? '' : 'none';
+      });
+    });
+  }
+
+  async function loadRankingFromApi() {
+    const rankingSection = document.getElementById('ranking');
+    const tbody = rankingSection.querySelector('tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="3" style="color:#888">Carregando ranking real...</td></tr>';
+
+    try {
+      const response = await fetch('/ranking');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const ranking = await response.json();
+      if (!Array.isArray(ranking)) throw new Error('Formato inválido da API');
+
+      const rows = ranking.map((player, index) => {
+        const safeId = `p-${index}-${String(player.nome || '').replace(/\W/g, '_')}`;
+        player.__safeId = safeId;
+        const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+
+        const mainRow = `
+          <tr class="${rankClass}">
+            <td><span class="rank-num">${index + 1}</span></td>
+            <td><span class="player-name" data-player-id="${safeId}">${escapeHtml(player.nome)}</span></td>
+            <td class="prize">${Number(player.total || 0)}</td>
+          </tr>
+        `;
+
+        const detailsRow = `
+          <tr class="player-details-row" data-player-id="${safeId}" style="display:none;">
+            <td></td>
+            <td colspan="2" style="background:rgba(245,200,0,0.07);padding:1rem 2rem;">
+              ${createDetailsHtml(player)}
+            </td>
+          </tr>
+        `;
+
+        return mainRow + detailsRow;
+      }).join('');
+
+      tbody.innerHTML = rows;
+      bindRankingInteractions();
+    } catch (error) {
+      console.error('Erro ao carregar ranking:', error);
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c">Erro ao carregar ranking real.</td></tr>';
+    }
+  }
+
+  loadRankingFromApi();
+
+  function toggleScorePanel(id) {
+    const panel = document.getElementById(id);
+    const btn = document.querySelector(`.score-tables-bar button[onclick*="${id}"]`);
+    const isVisible = panel.classList.contains('visible');
+    document.querySelectorAll('.score-panel').forEach(p => p.classList.remove('visible'));
+    document.querySelectorAll('.score-tables-bar button').forEach(b => b.classList.remove('active'));
+    if (!isVisible) {
+      panel.classList.add('visible');
+      if (btn) btn.classList.add('active');
+    }
+  }
+</script>
+</body>
+</html>
