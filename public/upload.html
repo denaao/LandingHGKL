@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload de Fotos — HGKL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --yellow: #f5c800; --bg: #111; --text: #eee; --text-muted: #aaa; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+    h1 { font-family: 'Oswald', sans-serif; font-size: 2rem; color: var(--yellow); margin-bottom: .5rem; text-align: center; }
+    .subtitle { color: var(--text-muted); margin-bottom: 2rem; text-align: center; font-size: .9rem; }
+
+    .tab-bar { display: flex; gap: .75rem; margin-bottom: 2rem; }
+    .tab-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: .85rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: .6rem 1.6rem;
+      border: 1px solid rgba(245,200,0,.4);
+      border-radius: 6px;
+      background: rgba(245,200,0,.08);
+      color: var(--yellow);
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .tab-btn:hover, .tab-btn.active {
+      background: rgba(245,200,0,.2);
+      border-color: var(--yellow);
+    }
+
+    .drop-zone {
+      width: 100%; max-width: 600px;
+      border: 2px dashed rgba(245,200,0,.4);
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+      margin-bottom: 1.5rem;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--yellow);
+      background: rgba(245,200,0,.05);
+    }
+    .drop-zone p { font-size: 1rem; margin-bottom: .5rem; }
+    .drop-zone small { font-size: .8rem; }
+    .drop-zone input { display: none; }
+
+    .upload-list { width: 100%; max-width: 600px; list-style: none; }
+    .upload-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .75rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .upload-item img {
+      width: 50px; height: 50px;
+      object-fit: cover; border-radius: 6px;
+    }
+    .upload-item .info { flex: 1; }
+    .upload-item .name { font-size: .85rem; word-break: break-all; }
+    .upload-item .status { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+    .upload-item .status.success { color: #27ae60; }
+    .upload-item .status.error { color: #e74c3c; }
+    .progress-bar {
+      width: 100%; height: 4px;
+      background: rgba(255,255,255,.1);
+      border-radius: 2px; margin-top: .3rem;
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%; width: 0%;
+      background: var(--yellow);
+      transition: width .2s;
+    }
+
+    .back-link {
+      margin-top: 2rem;
+      color: var(--yellow);
+      text-decoration: none;
+      font-size: .85rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Upload de Fotos</h1>
+  <p class="subtitle">Selecione a etapa e arraste as fotos ou clique para escolher.</p>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="selectEtapa('etapa1', this)">Etapa 1</button>
+    <button class="tab-btn" onclick="selectEtapa('etapa2', this)">Etapa 2</button>
+  </div>
+
+  <div class="drop-zone" id="dropZone">
+    <p>Arraste as fotos aqui</p>
+    <small>ou clique para selecionar</small>
+    <input type="file" id="fileInput" multiple accept="image/*" />
+  </div>
+
+  <ul class="upload-list" id="uploadList"></ul>
+
+  <a href="/" class="back-link">&larr; Voltar ao site</a>
+
+  <script>
+    const CLOUD_NAME = 'dk3qmdebu';
+    const PRESETS = { etapa1: 'HGKL-etapa1', etapa2: 'HGKL-etapa2' };
+    let currentEtapa = 'etapa1';
+
+    function selectEtapa(etapa, btn) {
+      currentEtapa = etapa;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadList = document.getElementById('uploadList');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
+    function handleFiles(files) {
+      Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        uploadFile(file);
+      });
+    }
+
+    function uploadFile(file) {
+      const li = document.createElement('li');
+      li.className = 'upload-item';
+
+      const thumb = URL.createObjectURL(file);
+      li.innerHTML = `
+        <img src="${thumb}" alt="" />
+        <div class="info">
+          <div class="name">${file.name}</div>
+          <div class="status">Enviando...</div>
+          <div class="progress-bar"><div class="fill"></div></div>
+        </div>
+      `;
+      uploadList.prepend(li);
+
+      const statusEl = li.querySelector('.status');
+      const fillEl = li.querySelector('.fill');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', PRESETS[currentEtapa]);
+      formData.append('tags', currentEtapa);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          fillEl.style.width = Math.round((e.loaded / e.total) * 100) + '%';
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          statusEl.textContent = 'Enviado!';
+          statusEl.className = 'status success';
+        } else {
+          statusEl.textContent = 'Erro no envio';
+          statusEl.className = 'status error';
+        }
+      };
+
+      xhr.onerror = () => {
+        statusEl.textContent = 'Erro de conexao';
+        statusEl.className = 'status error';
+      };
+
+      xhr.send(formData);
+    }
+  </script>
+</body>
+</html>
