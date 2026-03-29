@@ -33,6 +33,7 @@
       <button class="btn btn-danger" id="btnClearDraw" onclick="clearDraw()" style="display:none">Apagar Sorteio</button>
       <button class="btn btn-green" id="btnFinal" onclick="openFinalModal()" style="display:none">Criar Mesa Final</button>
       <button class="btn" id="btnFinish" onclick="finishEtapa()" style="display:none">Encerrar Etapa</button>
+      <button class="btn btn-primary" id="btnPdf" onclick="downloadPdf()" style="display:none">Baixar PDF</button>
     </div>
   </div>
 
@@ -182,10 +183,18 @@
       const hasFinal = tablesData.some(t => t.phase === 'final');
       const allTeamsReady = teamsData.length >= 2 && teamsData.every(t => t.players.length === 8);
 
-      document.getElementById('btnDraw').style.display = (!hasTables && allTeamsReady) ? '' : 'none';
-      document.getElementById('btnClearDraw').style.display = hasQualifying ? '' : 'none';
-      document.getElementById('btnFinal').style.display = (hasQualifying && !hasFinal && isQualifyingComplete()) ? '' : 'none';
-      document.getElementById('btnFinish').style.display = (hasFinal && isFinalComplete()) ? '' : 'none';
+      const isFinished = etapaData && etapaData.status === 'finished';
+
+      document.getElementById('btnDraw').style.display = (!hasTables && allTeamsReady && !isFinished) ? '' : 'none';
+      document.getElementById('btnClearDraw').style.display = (hasQualifying && !isFinished) ? '' : 'none';
+      document.getElementById('btnFinal').style.display = (hasQualifying && !hasFinal && isQualifyingComplete() && !isFinished) ? '' : 'none';
+      document.getElementById('btnFinish').style.display = (hasFinal && isFinalComplete() && !isFinished) ? '' : 'none';
+      document.getElementById('btnPdf').style.display = isFinished ? '' : 'none';
+
+      if (isFinished) {
+        document.getElementById('teamsSection').querySelector('.card-title button').style.display = 'none';
+        document.getElementById('pageTitle').textContent = (etapaData.nome || 'Etapa') + ' (Encerrada)';
+      }
 
       const rankSection = document.getElementById('rankingSection');
       rankSection.style.display = hasTables ? '' : 'none';
@@ -219,13 +228,18 @@
     }
 
     async function finishEtapa() {
-      if (!confirm('Encerrar esta etapa?')) return;
+      if (!confirm('Encerrar esta etapa? Os valores serão congelados e não poderão ser editados.')) return;
+      if (!confirm('Tem certeza? Esta ação não pode ser desfeita.')) return;
       await fetch(`/api/admin/etapas/${etapaId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'finished' })
       });
       loadAll();
+    }
+
+    function downloadPdf() {
+      window.open(`/api/admin/etapas/${etapaId}/pdf`, '_blank');
     }
 
     // ── TABLES ──
@@ -252,6 +266,7 @@
     }
 
     function renderMesa(table) {
+      const isFinished = etapaData && etapaData.status === 'finished';
       const nextOrder = table.seats.filter(s => s.elimination_order !== null).length + 1;
       const totalSeats = table.seats.length;
       const complete = table.seats.every(s => s.elimination_order !== null);
@@ -271,7 +286,7 @@
           </div>
           ${sortedSeats.map(s => {
             const isEliminated = s.elimination_order !== null;
-            const canEliminate = !isEliminated && !complete;
+            const canEliminate = !isEliminated && !complete && !isFinished;
             const position = isEliminated ? (totalSeats + 1 - s.elimination_order) : '';
             return `
               <div class="seat-row ${isEliminated ? 'eliminated' : ''}"
@@ -283,7 +298,7 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:.5rem;">
                   ${isEliminated ? `<span class="seat-order">${position}o lugar</span><span class="seat-points">${s.points} pts</span>` : ''}
-                  ${isEliminated ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();clearSeat(${s.seat_id})" title="Desfazer">&#8635;</button>` : ''}
+                  ${isEliminated && !isFinished ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();clearSeat(${s.seat_id})" title="Desfazer">&#8635;</button>` : ''}
                 </div>
               </div>
             `;
