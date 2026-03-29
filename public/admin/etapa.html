@@ -188,7 +188,8 @@
       document.getElementById('btnDraw').style.display = (!hasTables && allTeamsReady && !isFinished) ? '' : 'none';
       document.getElementById('btnClearDraw').style.display = (hasQualifying && !isFinished) ? '' : 'none';
       document.getElementById('btnFinal').style.display = (hasQualifying && !hasFinal && isQualifyingComplete() && !isFinished) ? '' : 'none';
-      document.getElementById('btnFinish').style.display = (hasFinal && isFinalComplete() && !isFinished) ? '' : 'none';
+      const canFinish = (hasFinal && isFinalComplete()) || (hasQualifying && isQualifyingComplete() && !hasFinal);
+      document.getElementById('btnFinish').style.display = (canFinish && !isFinished) ? '' : 'none';
       document.getElementById('btnPdf').style.display = isFinished ? '' : 'none';
 
       if (isFinished) {
@@ -230,11 +231,17 @@
     async function finishEtapa() {
       if (!confirm('Encerrar esta etapa? Os valores serão congelados e não poderão ser editados.')) return;
       if (!confirm('Tem certeza? Esta ação não pode ser desfeita.')) return;
-      await fetch(`/api/admin/etapas/${etapaId}`, {
+      const res = await fetch(`/api/admin/etapas/${etapaId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'finished' })
       });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Erro ao encerrar');
+        return;
+      }
+      alert('Etapa encerrada! Valores congelados.');
       loadAll();
     }
 
