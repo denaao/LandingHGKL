@@ -188,8 +188,7 @@
       document.getElementById('btnDraw').style.display = (!hasTables && allTeamsReady && !isFinished) ? '' : 'none';
       document.getElementById('btnClearDraw').style.display = (hasQualifying && !isFinished) ? '' : 'none';
       document.getElementById('btnFinal').style.display = (hasQualifying && !hasFinal && isQualifyingComplete() && !isFinished) ? '' : 'none';
-      const canFinish = (hasFinal && isFinalComplete()) || (hasQualifying && isQualifyingComplete() && !hasFinal);
-      document.getElementById('btnFinish').style.display = (canFinish && !isFinished) ? '' : 'none';
+      document.getElementById('btnFinish').style.display = (hasFinal && isFinalComplete() && !isFinished) ? '' : 'none';
       document.getElementById('btnPdf').style.display = isFinished ? '' : 'none';
 
       if (isFinished) {
