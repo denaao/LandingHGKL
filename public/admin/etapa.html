@@ -33,6 +33,7 @@
       <button class="btn btn-danger" id="btnClearDraw" onclick="clearDraw()" style="display:none">Apagar Sorteio</button>
       <button class="btn btn-green" id="btnFinal" onclick="openFinalModal()" style="display:none">Criar Mesa Final</button>
       <button class="btn" id="btnFinish" onclick="finishEtapa()" style="display:none">Encerrar Etapa</button>
+      <button class="btn" id="btnPrint" onclick="printPositions()" style="display:none">Imprimir Posicoes</button>
       <button class="btn btn-primary" id="btnPdf" onclick="downloadPdf()" style="display:none">Baixar PDF</button>
     </div>
   </div>
@@ -187,6 +188,7 @@
 
       document.getElementById('btnDraw').style.display = (!hasTables && allTeamsReady && !isFinished) ? '' : 'none';
       document.getElementById('btnClearDraw').style.display = (hasQualifying && !isFinished) ? '' : 'none';
+      document.getElementById('btnPrint').style.display = hasQualifying ? '' : 'none';
       document.getElementById('btnFinal').style.display = (hasQualifying && !hasFinal && isQualifyingComplete() && !isFinished) ? '' : 'none';
       document.getElementById('btnFinish').style.display = (hasFinal && isFinalComplete() && !isFinished) ? '' : 'none';
       document.getElementById('btnPdf').style.display = isFinished ? '' : 'none';
@@ -246,6 +248,32 @@
 
     function downloadPdf() {
       window.open(`/api/admin/etapas/${etapaId}/pdf`, '_blank');
+    }
+
+    function printPositions() {
+      const qualifying = tablesData.filter(t => t.phase === 'qualifying');
+      if (qualifying.length === 0) { alert('Nenhuma mesa sorteada.'); return; }
+
+      let lines = [];
+      qualifying.forEach(table => {
+        table.seats.forEach((s, i) => {
+          lines.push(`${s.player_nome} - ${s.team_nome} | Mesa ${table.numero} Posicao ${i + 1}`);
+        });
+      });
+
+      const win = window.open('', '_blank');
+      win.document.write(`<!DOCTYPE html><html><head><title>Posicoes</title>
+        <style>
+          @page { margin: 2mm; }
+          body { font-family: monospace; font-size: 11px; margin: 0; padding: 2mm; }
+          .ticket { padding: 3px 0; border-bottom: 1px dashed #000; page-break-inside: avoid; }
+        </style></head><body>`);
+      lines.forEach(l => {
+        win.document.write(`<div class="ticket">${l}</div>`);
+      });
+      win.document.write('</body></html>');
+      win.document.close();
+      win.print();
     }
 
     // ── TABLES ──
