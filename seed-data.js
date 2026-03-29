@@ -39,6 +39,7 @@ const teams = [
   { nome: "Business Poker", players: ["Geraldo Magela Júnior","Eric Silveira","Marcus Vinícius Scarabucci","Luciano Takahashi","Renne Vedrossi","Thiago Machado de Camargo","Celso Roberto Franco de Camargo","Andre Assad Mell"] },
   { nome: "Suprema", players: ["Rafael Silva","Breno Lenzi","Etiene Athyde","Matheus","Vasco Tavares","Estefani","Arnaldo","Julio Cesar"] },
   { nome: "Ney Bosco", players: ["Juliana Viana","Carlos Paiva","Johnny da Silva","Guilherme Ommundsen","Emerson Weber Sampaio","Yann do Vale Martins","Guilherme Santos","Ney Bosco"] },
+  { nome: "Leva o Restinho Team", players: ["Jocimar Daniel","Luciana Wada","Fernando Egami","Gilda Kinjo","Rodrigo Floriano","Yang Sup Choi","Luiz Donizete dos Santos Junior","Roberto Moriya"] },
 ];
 
 const insertTeam = db.prepare('INSERT INTO teams (etapa_id, nome, registration_token) VALUES (?, ?, ?)');
