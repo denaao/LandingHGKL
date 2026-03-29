@@ -56,4 +56,75 @@ router.post('/register/:token', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── PUBLIC RANKING ──
+
+router.get('/public/etapas', (req, res) => {
+  const etapas = db.prepare("SELECT id, nome, status FROM etapas ORDER BY id DESC").all();
+  res.json(etapas);
+});
+
+router.get('/public/etapas/:id/ranking', (req, res) => {
+  const etapaId = req.params.id;
+  const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ? ORDER BY id').all(etapaId);
+  const ranking = [];
+
+  for (const team of teams) {
+    const qualifyingPoints = db.prepare(`
+      SELECT COALESCE(SUM(s.points), 0) as total
+      FROM seats s
+      JOIN tables_t t ON s.table_id = t.id
+      JOIN players p ON s.player_id = p.id
+      WHERE p.team_id = ? AND t.etapa_id = ? AND t.phase = 'qualifying'
+    `).get(team.id, etapaId);
+
+    const finalPoints = db.prepare(`
+      SELECT COALESCE(SUM(s.points), 0) as total
+      FROM seats s
+      JOIN tables_t t ON s.table_id = t.id
+      JOIN players p ON s.player_id = p.id
+      WHERE p.team_id = ? AND t.etapa_id = ? AND t.phase = 'final'
+    `).get(team.id, etapaId);
+
+    const playerDetails = db.prepare(`
+      SELECT p.nome as player_nome, tb.numero as mesa,
+             tb.phase, s.elimination_order, s.points,
+             ((SELECT COUNT(*) FROM seats WHERE table_id = s.table_id) + 1 - s.elimination_order) as position
+      FROM seats s
+      JOIN players p ON s.player_id = p.id
+      JOIN tables_t tb ON s.table_id = tb.id
+      WHERE p.team_id = ? AND tb.etapa_id = ? AND s.elimination_order IS NOT NULL
+      ORDER BY tb.phase, tb.numero
+    `).all(team.id, etapaId);
+
+    ranking.push({
+      team_id: team.id,
+      team_nome: team.nome,
+      qualifying_points: qualifyingPoints.total,
+      final_points: finalPoints.total,
+      total_points: qualifyingPoints.total + finalPoints.total,
+      details: playerDetails
+    });
+  }
+
+  ranking.sort((a, b) => b.total_points - a.total_points);
+  res.json(ranking);
+});
+
+router.get('/public/etapas/:id/tables', (req, res) => {
+  const tables = db.prepare('SELECT * FROM tables_t WHERE etapa_id = ? ORDER BY phase, numero').all(req.params.id);
+  for (const table of tables) {
+    table.seats = db.prepare(`
+      SELECT s.id as seat_id, s.elimination_order, s.points,
+             p.id as player_id, p.nome as player_nome,
+             t.id as team_id, t.nome as team_nome
+      FROM seats s
+      JOIN players p ON s.player_id = p.id
+      JOIN teams t ON p.team_id = t.id
+      WHERE s.table_id = ?
+      ORDER BY s.id
+    `).all(table.id);
+  }
+  res.json(tables);
+});
+
 export default router;
