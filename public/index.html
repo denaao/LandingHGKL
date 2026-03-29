@@ -420,6 +420,40 @@
     .gb-w  { background: rgba(245,200,0,.15);   color: var(--yellow);  border: 1px solid rgba(245,200,0,.35); }
     .gb-g  { background: rgba(39,174,96,.15);   color: #27ae60;        border: 1px solid rgba(39,174,96,.35); }
 
+    /* ── FOTOGRAFO ── */
+    .galeria-header {
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .galeria-header-text { flex: 1; }
+    .galeria-divider {
+      width: 2px; height: 140px;
+      background: var(--yellow); opacity: .4;
+      flex-shrink: 0;
+    }
+    .fotografo {
+      display: flex; align-items: center; gap: 1.2rem;
+      flex-shrink: 0;
+    }
+    .fotografo img {
+      width: 100px; height: 100px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--yellow);
+    }
+    .fotografo-info { font-size: .85rem; }
+    .fotografo-label {
+      font-family: 'Oswald', sans-serif;
+      color: var(--yellow); font-size: .75rem;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: .2rem;
+    }
+    .fotografo-nome { font-weight: 600; font-size: 1rem; }
+    @media (max-width: 768px) {
+      .galeria-header { flex-direction: column; text-align: center; gap: 1rem; }
+      .galeria-divider { width: 60%; height: 2px; }
+      .fotografo { flex-direction: column; text-align: center; }
+    }
+
     /* ── GALERIA ── */
     .gallery-grid {
       display: grid;
@@ -1206,8 +1240,20 @@
 <!-- GALERIA -->
 <section id="galeria">
   <div class="section-tag">Fotos</div>
-  <h2 class="section-title">Galeria de <span>Fotos</span></h2>
-  <p class="section-desc">Momentos marcantes das etapas anteriores.</p>
+  <div class="galeria-header">
+    <div class="galeria-header-text">
+      <h2 class="section-title">Galeria de <span>Fotos</span></h2>
+      <p class="section-desc">Momentos marcantes das etapas anteriores.</p>
+    </div>
+    <div class="galeria-divider"></div>
+    <div class="fotografo">
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/aekgimmx0we3ujx3ctc8.png" alt="Fot&oacute;grafo oficial" />
+      <div class="fotografo-info">
+        <div class="fotografo-label">Fot&oacute;grafo Oficial</div>
+        <div class="fotografo-nome">Nosso fot&oacute;grafo oficial</div>
+      </div>
+    </div>
+  </div>
   <div class="gallery-tabs">
     <button class="gallery-tab active" onclick="switchGalleryTab('etapa1')">Etapa 1</button>
     <button class="gallery-tab" onclick="switchGalleryTab('etapa2')">Etapa 2</button>
