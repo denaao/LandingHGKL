@@ -422,13 +422,14 @@
 
     /* ── FOTOGRAFO ── */
     .galeria-header {
-      display: flex; align-items: center; gap: 2rem;
+      display: flex; align-items: center; gap: 2.5rem;
       margin-bottom: 2rem;
     }
     .galeria-header-text { flex: 1; }
+    .galeria-header-text .section-title { margin-bottom: .3rem; }
     .galeria-divider {
-      width: 2px; height: 140px;
-      background: var(--yellow); opacity: .4;
+      width: 2px; align-self: stretch;
+      background: linear-gradient(transparent, var(--yellow), transparent);
       flex-shrink: 0;
     }
     .fotografo {
@@ -436,9 +437,10 @@
       flex-shrink: 0;
     }
     .fotografo img {
-      width: 100px; height: 100px;
-      border-radius: 50%; object-fit: cover;
-      border: 2px solid var(--yellow);
+      width: 100px !important; height: 100px !important;
+      border-radius: 50% !important; object-fit: cover;
+      border: 2px solid var(--yellow) !important;
+      cursor: default !important;
     }
     .fotografo-info { font-size: .85rem; }
     .fotografo-label {
