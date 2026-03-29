@@ -110,6 +110,39 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
   res.json(ranking);
 });
 
+router.get('/public/ranking-geral', (req, res) => {
+  const etapas = db.prepare("SELECT * FROM etapas ORDER BY id").all();
+  const teamTotals = {};
+
+  for (const etapa of etapas) {
+    const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ?').all(etapa.id);
+    for (const team of teams) {
+      const pts = db.prepare(`
+        SELECT COALESCE(SUM(s.points), 0) as total
+        FROM seats s
+        JOIN tables_t t ON s.table_id = t.id
+        JOIN players p ON s.player_id = p.id
+        WHERE p.team_id = ? AND t.etapa_id = ?
+      `).get(team.id, etapa.id);
+
+      const key = team.nome;
+      if (!teamTotals[key]) {
+        teamTotals[key] = { team_nome: team.nome, total_points: 0, etapas: [] };
+      }
+      if (pts.total > 0) {
+        teamTotals[key].total_points += pts.total;
+        teamTotals[key].etapas.push({ nome: etapa.nome, points: pts.total });
+      }
+    }
+  }
+
+  const ranking = Object.values(teamTotals)
+    .filter(t => t.total_points > 0)
+    .sort((a, b) => b.total_points - a.total_points);
+
+  res.json(ranking);
+});
+
 router.get('/public/etapas/:id/tables', (req, res) => {
   const tables = db.prepare('SELECT * FROM tables_t WHERE etapa_id = ? ORDER BY phase, numero').all(req.params.id);
   for (const table of tables) {

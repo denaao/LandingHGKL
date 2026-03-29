@@ -140,16 +140,63 @@
           return;
         }
         renderTabs();
-        selectEtapa(etapas[0].id);
+        selectGeral();
       } catch (e) {
         document.getElementById('content').innerHTML = '<p class="loading">Erro ao carregar dados.</p>';
       }
     }
 
     function renderTabs() {
-      document.getElementById('etapaTabs').innerHTML = etapas.map(e =>
+      let html = `<button class="etapa-tab" data-id="geral" onclick="selectGeral()">Geral</button>`;
+      html += etapas.map(e =>
         `<button class="etapa-tab" data-id="${e.id}" onclick="selectEtapa(${e.id})">${e.nome}</button>`
       ).join('');
+      document.getElementById('etapaTabs').innerHTML = html;
+    }
+
+    function selectGeral() {
+      currentEtapaId = 'geral';
+      document.querySelectorAll('.etapa-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.id === 'geral');
+      });
+      if (autoRefresh) clearInterval(autoRefresh);
+      loadGeralRanking();
+      autoRefresh = setInterval(loadGeralRanking, 15000);
+    }
+
+    async function loadGeralRanking() {
+      try {
+        const res = await fetch('/api/public/ranking-geral');
+        const ranking = await res.json();
+        const content = document.getElementById('content');
+        if (ranking.length === 0) {
+          content.innerHTML = '<p class="loading">Nenhum resultado disponivel.</p>';
+          return;
+        }
+        content.innerHTML = ranking.map((team, i) => `
+          <div class="rank-card ${i < 3 ? 'rank-' + (i + 1) : ''}">
+            <div class="rank-main" onclick="toggleDetails(this)">
+              <span class="rank-pos">${i + 1}</span>
+              <div class="rank-team">
+                ${team.team_nome}
+                <div class="rank-breakdown">${team.etapas.map(e => e.nome + ': ' + e.points).join(' | ')}</div>
+              </div>
+              <div class="rank-total">${team.total_points} <small>pts</small></div>
+            </div>
+            <div class="rank-details">
+              ${team.etapas.map(e => `
+                <div class="detail-row">
+                  <div class="detail-player">${e.nome}</div>
+                  <div class="detail-info"><span class="detail-pts">${e.points} pts</span></div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `).join('');
+        document.getElementById('updated').textContent = 'Atualizado: ' + new Date().toLocaleTimeString('pt-BR');
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     function selectEtapa(id) {
