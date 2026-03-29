@@ -258,23 +258,71 @@
 
       if (tablesToPrint.length === 0) { alert('Nenhuma mesa sorteada.'); return; }
 
-      let lines = [];
+      let tickets = [];
       tablesToPrint.forEach(table => {
         const label = table.phase === 'final' ? 'Mesa Final' : `Mesa ${table.numero}`;
         table.seats.forEach((s, i) => {
-          lines.push(`${s.player_nome} - ${s.team_nome} | ${label} Posicao ${i + 1}`);
+          tickets.push({ nome: s.player_nome, equipe: s.team_nome, mesa: label, posicao: i + 1 });
         });
       });
 
       const win = window.open('', '_blank');
       win.document.write(`<!DOCTYPE html><html><head><title>Posicoes</title>
         <style>
-          @page { margin: 2mm; }
-          body { font-family: monospace; font-size: 11px; margin: 0; padding: 2mm; }
-          .ticket { padding: 3px 0; border-bottom: 1px dashed #000; page-break-inside: avoid; }
+          @page { size: 45mm 60mm; margin: 0; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, sans-serif; }
+          .ticket {
+            width: 45mm; height: 60mm;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center;
+            page-break-after: always;
+            padding: 2mm;
+          }
+          .ticket-top {
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            width: 100%;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 2mm;
+          }
+          .ticket-nome {
+            font-size: 11pt; font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.2;
+            word-break: break-word;
+          }
+          .ticket-equipe {
+            font-size: 7pt; color: #555;
+            margin-top: 1mm;
+          }
+          .ticket-bottom {
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            width: 100%;
+            padding-top: 2mm;
+          }
+          .ticket-mesa {
+            font-size: 10pt; font-weight: 700;
+          }
+          .ticket-posicao {
+            font-size: 9pt; margin-top: 1mm;
+          }
         </style></head><body>`);
-      lines.forEach(l => {
-        win.document.write(`<div class="ticket">${l}</div>`);
+      tickets.forEach(t => {
+        win.document.write(`
+          <div class="ticket">
+            <div class="ticket-top">
+              <div class="ticket-nome">${t.nome}</div>
+              <div class="ticket-equipe">${t.equipe}</div>
+            </div>
+            <div class="ticket-bottom">
+              <div class="ticket-mesa">${t.mesa}</div>
+              <div class="ticket-posicao">Posicao ${t.posicao}</div>
+            </div>
+          </div>
+        `);
       });
       win.document.write('</body></html>');
       win.document.close();
