@@ -251,13 +251,18 @@
     }
 
     function printPositions() {
-      const qualifying = tablesData.filter(t => t.phase === 'qualifying');
-      if (qualifying.length === 0) { alert('Nenhuma mesa sorteada.'); return; }
+      const hasFinal = tablesData.some(t => t.phase === 'final');
+      const tablesToPrint = hasFinal
+        ? tablesData.filter(t => t.phase === 'final')
+        : tablesData.filter(t => t.phase === 'qualifying');
+
+      if (tablesToPrint.length === 0) { alert('Nenhuma mesa sorteada.'); return; }
 
       let lines = [];
-      qualifying.forEach(table => {
+      tablesToPrint.forEach(table => {
+        const label = table.phase === 'final' ? 'Mesa Final' : `Mesa ${table.numero}`;
         table.seats.forEach((s, i) => {
-          lines.push(`${s.player_nome} - ${s.team_nome} | Mesa ${table.numero} Posicao ${i + 1}`);
+          lines.push(`${s.player_nome} - ${s.team_nome} | ${label} Posicao ${i + 1}`);
         });
       });
 
