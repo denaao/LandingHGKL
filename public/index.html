@@ -1288,9 +1288,8 @@
       </div>
     </div>
   </div>
-  <div class="gallery-tabs">
-    <button class="gallery-tab active" onclick="switchGalleryTab('etapa1')">Etapa 1</button>
-    <button class="gallery-tab" onclick="switchGalleryTab('etapa2')">Etapa 2</button>
+  <div class="gallery-tabs" id="galleryTabs">
+    <p style="color:var(--text-muted);font-size:.85rem;">Carregando etapas...</p>
   </div>
   <div class="gallery-grid" id="galleryGrid">
     <p class="gallery-empty">Carregando fotos...</p>
@@ -1708,13 +1707,49 @@
   loadRankingFromApi();
 
   // ── GALERIA CLOUDINARY ──
-  let currentGalleryTab = 'etapa1';
+  let currentGalleryTab = null;
+  const CLOUD = 'dk3qmdebu';
+
+  async function discoverGalleryEtapas() {
+    const tabs = document.getElementById('galleryTabs');
+    const maxEtapas = 20;
+    const found = [];
+
+    const checks = [];
+    for (let i = 1; i <= maxEtapas; i++) {
+      checks.push(
+        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/etapa${i}.json`)
+          .then(r => r.ok ? r.json().then(d => ({ tag: `etapa${i}`, label: `Etapa ${i}`, count: (d.resources || []).length })) : null)
+          .catch(() => null)
+      );
+    }
+
+    const results = await Promise.all(checks);
+    for (const r of results) {
+      if (r && r.count > 0) found.push(r);
+    }
+
+    if (found.length === 0) {
+      tabs.innerHTML = '';
+      document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">Nenhuma foto dispon&iacute;vel ainda.</p>';
+      return;
+    }
+
+    tabs.innerHTML = found.map(e =>
+      `<button class="gallery-tab" onclick="switchGalleryTab('${e.tag}', this)">${e.label}</button>`
+    ).join('');
+
+    // Select first tab
+    const firstBtn = tabs.querySelector('.gallery-tab');
+    firstBtn.classList.add('active');
+    switchGalleryTab(found[0].tag, firstBtn);
+  }
 
   async function loadGallery(tag) {
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '<p class="gallery-empty">Carregando fotos...</p>';
     try {
-      const res = await fetch(`https://res.cloudinary.com/dk3qmdebu/image/list/${tag}.json`);
+      const res = await fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${tag}.json`);
       if (!res.ok) throw new Error('Erro ao buscar fotos');
       const data = await res.json();
       if (!data.resources || data.resources.length === 0) {
@@ -1722,8 +1757,8 @@
         return;
       }
       grid.innerHTML = data.resources.map(img => {
-        const thumb = `https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_400,h_400,q_auto,f_auto/${img.public_id}.${img.format}`;
-        const full = `https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/${img.public_id}.${img.format}`;
+        const thumb = `https://res.cloudinary.com/${CLOUD}/image/upload/c_fill,w_400,h_400,q_auto,f_auto/${img.public_id}.${img.format}`;
+        const full = `https://res.cloudinary.com/${CLOUD}/image/upload/q_auto,f_auto/${img.public_id}.${img.format}`;
         return `<img src="${thumb}" alt="Foto evento" loading="lazy" onclick="openLightbox('${full}')" />`;
       }).join('');
     } catch (e) {
@@ -1732,14 +1767,14 @@
     }
   }
 
-  function switchGalleryTab(tag) {
+  function switchGalleryTab(tag, btn) {
     currentGalleryTab = tag;
     document.querySelectorAll('.gallery-tab').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.gallery-tab[onclick*="${tag}"]`).classList.add('active');
+    if (btn) btn.classList.add('active');
     loadGallery(tag);
   }
 
-  loadGallery('etapa1');
+  discoverGalleryEtapas();
 
   function openLightbox(src) {
     document.getElementById('lightboxImg').src = src;

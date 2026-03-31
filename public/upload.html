@@ -102,10 +102,7 @@
     <h1>Upload de Fotos</h1>
     <p class="subtitle">Selecione a etapa e arraste as fotos ou clique para escolher.</p>
 
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="selectEtapa('etapa1', this)">Etapa 1</button>
-      <button class="tab-btn" onclick="selectEtapa('etapa2', this)">Etapa 2</button>
-    </div>
+    <div class="tab-bar" id="etapaTabs"></div>
 
     <div class="drop-zone" id="dropZone">
       <p>Arraste as fotos aqui</p>
@@ -141,14 +138,46 @@
     }
 
     const CLOUD_NAME = 'dk3qmdebu';
-    const PRESETS = { etapa1: 'HGKL-etapa1', etapa2: 'HGKL-etapa2' };
+    const UPLOAD_PRESET = 'HGKL-etapa1';
     let currentEtapa = 'etapa1';
+
+    function getEtapas() {
+      const stored = localStorage.getItem('gallery_etapas');
+      if (stored) return JSON.parse(stored);
+      return [{ tag: 'etapa1', label: 'Etapa 1' }, { tag: 'etapa2', label: 'Etapa 2' }];
+    }
+
+    function saveEtapas(etapas) {
+      localStorage.setItem('gallery_etapas', JSON.stringify(etapas));
+    }
+
+    function renderEtapaTabs() {
+      const etapas = getEtapas();
+      const tabs = document.getElementById('etapaTabs');
+      tabs.innerHTML = etapas.map((e, i) =>
+        `<button class="tab-btn ${e.tag === currentEtapa ? 'active' : ''}" onclick="selectEtapa('${e.tag}', this)">${e.label}</button>`
+      ).join('') + `<button class="tab-btn" onclick="addEtapa()" style="border-style:dashed;">+ Nova Etapa</button>`;
+    }
 
     function selectEtapa(etapa, btn) {
       currentEtapa = etapa;
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
+
+    function addEtapa() {
+      const label = prompt('Nome da etapa (ex: Etapa 3):');
+      if (!label || !label.trim()) return;
+      const tag = label.trim().toLowerCase().replace(/\s+/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const etapas = getEtapas();
+      if (etapas.some(e => e.tag === tag)) { alert('Etapa ja existe!'); return; }
+      etapas.push({ tag, label: label.trim() });
+      saveEtapas(etapas);
+      currentEtapa = tag;
+      renderEtapaTabs();
+    }
+
+    renderEtapaTabs();
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -191,7 +220,7 @@
 
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('upload_preset', PRESETS[currentEtapa]);
+      formData.append('upload_preset', UPLOAD_PRESET);
       formData.append('tags', currentEtapa);
 
       const xhr = new XMLHttpRequest();
