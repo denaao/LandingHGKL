@@ -21,6 +21,15 @@ app.use(session({
   }
 }));
 
+// Redirect admin subdomain root to login page
+app.use((req, res, next) => {
+  const host = req.hostname || '';
+  if (host.startsWith('admin.') && req.path === '/') {
+    return res.redirect('/login.html');
+  }
+  next();
+});
+
 app.use(express.static('public'));
 
 app.use('/api/auth', authRoutes);
