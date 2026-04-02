@@ -17,6 +17,9 @@
     "express-session": "^1.19.0",
     "pdfkit": "^0.18.0"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "devDependencies": {
     "nodemon": "^2.0.22"
   }
