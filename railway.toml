@@ -1,9 +1,6 @@
 [build]
 builder = "nixpacks"
 
-[build.nixpacksPlan.phases.setup]
-nixPkgs = ["nodejs_20", "python3", "nodePackages.node-gyp"]
-
 [deploy]
 startCommand = "node index.js"
 restartPolicyType = "on_failure"
