@@ -1669,6 +1669,10 @@
     });
   }
 
+  const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://landinghgkl-production.up.railway.app';
+
   async function loadRankingFromApi() {
     const rankingSection = document.getElementById('ranking');
     const tbody = rankingSection.querySelector('tbody');
@@ -1677,7 +1681,7 @@
     tbody.innerHTML = '<tr><td colspan="3" style="color:#888">Carregando ranking real...</td></tr>';
 
     try {
-      const response = await fetch('/ranking');
+      const response = await fetch(`${API_BASE}/ranking`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const ranking = await response.json();
@@ -1788,7 +1792,7 @@
     });
 
     try {
-      const response = await fetch('/gallery-tags');
+      const response = await fetch(`${API_BASE}/gallery-tags`);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -1835,7 +1839,7 @@
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '<p class="gallery-empty">Carregando fotos...</p>';
     try {
-      const res = await fetch(`/gallery-photos/${encodeURIComponent(tag)}`);
+      const res = await fetch(`${API_BASE}/gallery-photos/${encodeURIComponent(tag)}`);
       if (!res.ok) throw new Error('Erro ao buscar fotos');
       const data = await res.json();
       if (!data.resources || data.resources.length === 0) {
