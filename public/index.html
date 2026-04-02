@@ -1733,15 +1733,26 @@
   function getConfiguredGalleryEtapas() {
     try {
       const raw = localStorage.getItem('gallery_etapas');
-      if (!raw) return [];
+      console.log('localStorage gallery_etapas raw:', raw);
+      if (!raw) {
+        console.log('gallery_etapas nao encontrado em localStorage');
+        return [];
+      }
       const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
+      console.log('gallery_etapas parsed:', parsed);
+      if (!Array.isArray(parsed)) {
+        console.log('gallery_etapas nao eh array');
+        return [];
+      }
 
-      return parsed
+      const result = parsed
         .filter(e => e && typeof e.tag === 'string' && typeof e.label === 'string')
         .map(e => ({ tag: normalizeEtapaTag(e.tag.trim()), label: e.label.trim() }))
         .filter(e => e.tag && e.label);
-    } catch {
+      console.log('Etapas configuradas finais:', result);
+      return result;
+    } catch (err) {
+      console.error('Erro ao ler gallery_etapas:', err);
       return [];
     }
   }
