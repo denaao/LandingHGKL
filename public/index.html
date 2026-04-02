@@ -1722,6 +1722,14 @@
   let currentGalleryTab = null;
   const CLOUD = 'dk3qmdebu';
 
+  function normalizeEtapaTag(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '');
+  }
+
   function getConfiguredGalleryEtapas() {
     try {
       const raw = localStorage.getItem('gallery_etapas');
@@ -1731,7 +1739,7 @@
 
       return parsed
         .filter(e => e && typeof e.tag === 'string' && typeof e.label === 'string')
-        .map(e => ({ tag: e.tag.trim(), label: e.label.trim() }))
+        .map(e => ({ tag: normalizeEtapaTag(e.tag.trim()), label: e.label.trim() }))
         .filter(e => e.tag && e.label);
     } catch {
       return [];
@@ -1750,7 +1758,7 @@
 
   async function discoverGalleryEtapas() {
     const tabs = document.getElementById('galleryTabs');
-    const maxEtapas = 20;
+    const maxEtapas = 60;
     const configuredEtapas = getConfiguredGalleryEtapas();
     const etapasMap = new Map();
 
@@ -1770,7 +1778,7 @@
     const checks = [];
     for (const etapa of etapasToCheck) {
       checks.push(
-        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${etapa.tag}.json`)
+        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(etapa.tag)}.json`)
           .then(r => r.ok ? r.json().then(d => ({ ...etapa, count: (d.resources || []).length })) : { ...etapa, count: 0 })
           .catch(() => null)
       );
@@ -1805,7 +1813,7 @@
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '<p class="gallery-empty">Carregando fotos...</p>';
     try {
-      const res = await fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${tag}.json`);
+      const res = await fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(tag)}.json`);
       if (!res.ok) throw new Error('Erro ao buscar fotos');
       const data = await res.json();
       if (!data.resources || data.resources.length === 0) {

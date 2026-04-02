@@ -141,9 +141,32 @@
     const UPLOAD_PRESET = 'HGKL-etapa1';
     let currentEtapa = 'etapa1';
 
+    function normalizeEtapaTag(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9_-]/g, '');
+    }
+
     function getEtapas() {
       const stored = localStorage.getItem('gallery_etapas');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            return parsed
+              .map((e) => ({
+                tag: normalizeEtapaTag(e?.tag || ''),
+                label: String(e?.label || '').trim()
+              }))
+              .filter((e) => e.tag && e.label);
+          }
+        } catch {
+          // fallback to defaults below
+        }
+      }
       return [{ tag: 'etapa1', label: 'Etapa 1' }, { tag: 'etapa2', label: 'Etapa 2' }];
     }
 
@@ -168,7 +191,11 @@
     function addEtapa() {
       const label = prompt('Nome da etapa (ex: Etapa 3):');
       if (!label || !label.trim()) return;
-      const tag = label.trim().toLowerCase().replace(/\s+/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const tag = normalizeEtapaTag(label.trim());
+      if (!tag) {
+        alert('Nome da etapa invalido. Use letras e numeros.');
+        return;
+      }
       const etapas = getEtapas();
       if (etapas.some(e => e.tag === tag)) { alert('Etapa ja existe!'); return; }
       etapas.push({ tag, label: label.trim() });
