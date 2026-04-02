@@ -161,7 +161,7 @@ router.get('/public/etapas/:id/tables', (req, res) => {
 });
 
 // Get gallery tags from Cloudinary
-router.get('/public/gallery-tags', async (req, res) => {
+router.get('/gallery-tags', async (req, res) => {
   try {
     const CLOUD_NAME = 'dk3qmdebu';
     const API_KEY = 'dk3qmdebu';

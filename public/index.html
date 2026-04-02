@@ -1784,7 +1784,7 @@
     // Buscar tags customizadas do servidor
     try {
       console.log('Buscando tags do servidor...');
-      const serverResponse = await fetch('/public/gallery-tags');
+      const serverResponse = await fetch('/gallery-tags');
       if (serverResponse.ok) {
         const { tags } = await serverResponse.json();
         console.log('Tags do servidor:', tags);

@@ -3,7 +3,15 @@
     "allow": [
       "Bash(curl -s http://localhost:3010/ranking)",
       "Bash(powershell -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
-      "Bash(node d:/Desktop/LandingHGKL/index.js)"
+      "Bash(node d:/Desktop/LandingHGKL/index.js)",
+      "Bash(npm install:*)",
+      "Bash(node seed-admin.js)",
+      "Bash(curl -s -X POST http://localhost:3011/api/admin/etapas -H \"Content-Type: application/json\" -d '{\"\"nome\"\":\"\"Etapa Teste\"\"}' -b cookies.txt)",
+      "Bash(curl -s http://localhost:3011/api/admin/etapas -b cookies.txt)",
+      "Bash(curl -s http://localhost:3011/api/admin/etapas/1/ranking -b cookies.txt)",
+      "Bash(node -e \"const d=require\\(''''fs''''\\).readFileSync\\(0,''''utf8''''\\);JSON.parse\\(d\\).forEach\\(t=>console.log\\(t.team_nome+'''': Q=''''+t.qualifying_points+'''' F=''''+t.final_points+'''' T=''''+t.total_points\\)\\);\")",
+      "Bash(powershell -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne \\(Get-Process -Name node | Sort-Object StartTime | Select-Object -First 1\\).Id } | Stop-Process -Force\")",
+      "Bash(curl -s -X POST http://localhost:3011/api/auth/login -H \"Content-Type: application/json\" -d '{\"\"username\"\":\"\"admin\"\",\"\"password\"\":\"\"hgkl2026\"\"}' -c cookies.txt)"
     ]
   }
 }
