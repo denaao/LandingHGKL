@@ -7,9 +7,10 @@ const app = express();
 const PORT = process.env.PORT || 3010;
 
 app.use(cors());
-app.use(express.static('public'));
 
 app.use(publicRoutes);
+
+app.use(express.static('public'));
 
 app.get('/ranking', (req, res) => {
   res.json(ranking);
