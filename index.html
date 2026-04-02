@@ -66,7 +66,7 @@
     }
     .nav-logo-top {
       font-family: 'Dancing Script', cursive;
-      font-size: .9rem;
+      font-size: 1.2rem;
       color: var(--text-muted);
       letter-spacing: 1px;
     }
@@ -420,16 +420,69 @@
     .gb-w  { background: rgba(245,200,0,.15);   color: var(--yellow);  border: 1px solid rgba(245,200,0,.35); }
     .gb-g  { background: rgba(39,174,96,.15);   color: #27ae60;        border: 1px solid rgba(39,174,96,.35); }
 
-    /* ── TABELAS DE PONTUAÇÃO ── */
-    .score-tables-bar {
-      display: flex; flex-wrap: wrap; gap: .75rem;
+    /* ── FOTOGRAFO ── */
+    .galeria-header {
+      display: flex; align-items: center; gap: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    .galeria-header-text { flex: 1; }
+    .galeria-header-text .section-title { margin-bottom: .3rem; }
+    .galeria-divider {
+      width: 2px; align-self: stretch;
+      background: linear-gradient(transparent, var(--yellow), transparent);
+      flex-shrink: 0;
+    }
+    .fotografo {
+      display: flex; align-items: center; gap: 1.2rem;
+      flex-shrink: 0;
+    }
+    .fotografo img {
+      width: 100px !important; height: 100px !important;
+      border-radius: 50% !important; object-fit: cover;
+      border: 2px solid var(--yellow) !important;
+      cursor: default !important;
+    }
+    .fotografo-info { font-size: .85rem; }
+    .fotografo-label {
+      font-family: 'Oswald', sans-serif;
+      color: var(--yellow); font-size: .75rem;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: .2rem;
+    }
+    .fotografo-nome { font-weight: 600; font-size: 1rem; }
+    @media (max-width: 768px) {
+      .galeria-header { flex-direction: column; text-align: center; gap: 1rem; }
+      .galeria-divider { width: 60%; height: 2px; }
+      .fotografo { flex-direction: column; text-align: center; }
+    }
+
+    /* ── GALERIA ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: .75rem;
+    }
+    .gallery-grid img {
+      width: 100%; height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      border: 1px solid rgba(245,200,0,.15);
+    }
+    .gallery-grid img:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 20px rgba(245,200,0,.25);
+    }
+    .gallery-tabs {
+      display: flex; gap: .75rem;
       justify-content: center; margin-bottom: 2rem;
     }
-    .score-tables-bar button {
+    .gallery-tab {
       font-family: 'Oswald', sans-serif;
-      font-size: .8rem; font-weight: 600;
+      font-size: .85rem; font-weight: 600;
       letter-spacing: 1px; text-transform: uppercase;
-      padding: .6rem 1.4rem;
+      padding: .6rem 1.6rem;
       border: 1px solid rgba(245,200,0,.4);
       border-radius: 6px;
       background: rgba(245,200,0,.08);
@@ -437,25 +490,33 @@
       cursor: pointer;
       transition: background .2s, border-color .2s;
     }
-    .score-tables-bar button:hover,
-    .score-tables-bar button.active {
+    .gallery-tab:hover,
+    .gallery-tab.active {
       background: rgba(245,200,0,.2);
       border-color: var(--yellow);
     }
-    .score-panel {
-      display: none;
-      margin-bottom: 2rem;
-      border: 1px solid rgba(245,200,0,.2);
-      border-radius: 8px;
-      overflow: hidden;
-      background: rgba(0,0,0,.25);
+    .gallery-empty {
+      text-align: center; color: #888;
+      padding: 3rem 1rem; font-size: .9rem;
     }
-    .score-panel.visible { display: block; }
-    .score-panel table { min-width: 0 !important; }
-    .score-panel th { font-size: .7rem; }
-    .score-panel td { font-size: .8rem; padding: .35rem .75rem; }
-    .score-panel td:first-child { color: var(--yellow); font-weight: 600; }
-    .score-panel td:last-child { text-align: right; }
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.92); z-index: 9999;
+      align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw; max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 0 40px rgba(245,200,0,.3);
+    }
+    .lightbox-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      font-size: 2rem; color: #fff; cursor: pointer;
+      background: none; border: none;
+      font-family: 'Oswald', sans-serif;
+    }
 
     /* ── RANKING ── */
     #ranking { background: transparent; }
@@ -760,7 +821,7 @@
 
     .sched-events {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: 1fr;
       gap: 1.25rem;
       align-items: stretch;
     }
@@ -856,7 +917,9 @@
     <li><a href="#games">Jogos</a></li>
     <li><a href="#ranking">Ranking</a></li>
     <li><a href="#batalha-hg">Batalha HG</a></li>
+    <li><a href="#galeria">Fotos</a></li>
     <li><a href="#location">Local</a></li>
+    <li><a href="#online">Online</a></li>
     <li><a href="#contact">Contato</a></li>
     <li><a href="https://www.instagram.com/king_poker_online" target="_blank" rel="noopener" class="nav-cta"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:6px"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>Siga-nos no Instagram</a></li>
   </ul>
@@ -867,70 +930,75 @@
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-inner">
+  <div class="hero-inner" style="flex-direction:row;align-items:center;gap:3rem;justify-content:center;flex-wrap:wrap;">
 
     <!-- logo -->
-    <img src="1 - logo.png" alt="Home Game King Live" class="hero-logo" />
-
-    <!-- download buttons -->
-    <div class="hero-tagline">
-      <div class="hero-tagline-main">Vem a&iacute; a 3&ordf; Etapa</div>
-      <div class="hero-tagline-sub">Esteja preparado!</div>
+    <div style="flex:1 1 50%;text-align:center;">
+      <img src="1 - logo.png" alt="Home Game King Live" class="hero-logo" style="max-width:500px;width:100%;" />
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/apoio-removebg-preview_ijeqie.png" alt="Apoio" style="width:420px;max-width:90%;margin-top:.5rem;opacity:.85;display:block;margin-left:auto;margin-right:auto;" />
     </div>
 
-    <div class="hero-divider"></div>
+    <div class="galeria-divider" style="min-height:300px;align-self:stretch;"></div>
 
-    <!-- datas -->
-    <div class="hero-dates">
-      <div class="hero-date-pill">
-        <span class="hero-date-num">23</span>
-        <span class="hero-date-day">Quinta<br/>Abr</span>
+    <!-- info -->
+    <div style="flex:1 1 40%;display:flex;flex-direction:column;align-items:center;gap:1rem;">
+      <div class="hero-tagline">
+        <div class="hero-tagline-main">Vem a&iacute; a 3&ordf; Etapa</div>
+        <div class="hero-tagline-sub">Esteja preparado!</div>
       </div>
-      <div class="hero-date-sep">/</div>
-      <div class="hero-date-pill">
-        <span class="hero-date-num">24</span>
-        <span class="hero-date-day">Sexta<br/>Abr</span>
-      </div>
-      <div class="hero-date-sep">/</div>
-      <div class="hero-date-pill">
-        <span class="hero-date-num">25</span>
-        <span class="hero-date-day">S&aacute;bado<br/>Abr</span>
-      </div>
-    </div>
 
-    <!-- local -->
-    <div class="hero-local">
-      <div class="hero-local-venue">Espa&ccedil;o UNIK &mdash; Clube Cultura Art&iacute;stica de Campinas</div>
-      <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
-    </div>
+      <!-- datas -->
+      <div class="hero-dates">
+        <div class="hero-date-pill">
+          <span class="hero-date-num">23</span>
+          <span class="hero-date-day">Quinta<br/>Abr</span>
+        </div>
+        <div class="hero-date-sep">/</div>
+        <div class="hero-date-pill">
+          <span class="hero-date-num">24</span>
+          <span class="hero-date-day">Sexta<br/>Abr</span>
+        </div>
+        <div class="hero-date-sep">/</div>
+        <div class="hero-date-pill">
+          <span class="hero-date-num">25</span>
+          <span class="hero-date-day">S&aacute;bado<br/>Abr</span>
+        </div>
+      </div>
 
-    <!-- countdown -->
-    <div class="countdown">
-      <div class="cd-block">
-        <span class="cd-num" id="cd-days">00</span>
-        <div class="cd-label">Dias</div>
+      <!-- local -->
+      <div class="hero-local">
+        <div class="hero-local-venue">Espa&ccedil;o UNIK &mdash; Clube Cultura Art&iacute;stica de Campinas</div>
+        <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
       </div>
-      <div class="cd-sep">:</div>
-      <div class="cd-block">
-        <span class="cd-num" id="cd-hours">00</span>
-        <div class="cd-label">Horas</div>
-      </div>
-      <div class="cd-sep">:</div>
-      <div class="cd-block">
-        <span class="cd-num" id="cd-mins">00</span>
-        <div class="cd-label">Min</div>
-      </div>
-      <div class="cd-sep">:</div>
-      <div class="cd-block">
-        <span class="cd-num" id="cd-secs">00</span>
-        <div class="cd-label">Seg</div>
-      </div>
-    </div>
 
-    <!-- botões -->
-    <div class="hero-buttons">
-      <a href="#contact" class="btn-primary">Garantir Vaga</a>
-      <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
+      <!-- countdown -->
+      <div class="countdown">
+        <div class="cd-block">
+          <span class="cd-num" id="cd-days">00</span>
+          <div class="cd-label">Dias</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-hours">00</span>
+          <div class="cd-label">Horas</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-mins">00</span>
+          <div class="cd-label">Min</div>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-block">
+          <span class="cd-num" id="cd-secs">00</span>
+          <div class="cd-label">Seg</div>
+        </div>
+      </div>
+
+      <!-- botões -->
+      <div class="hero-buttons">
+        <a href="#contact" class="btn-primary">Garantir Vaga</a>
+        <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
+      </div>
     </div>
 
   </div>
@@ -939,11 +1007,23 @@
 <!-- GAMES -->
 <section id="games">
   <div class="section-tag">Programa&ccedil;&atilde;o</div>
-  <h2 class="section-title">Calend&aacute;rio de <span>Eventos</span></h2>
-  <p class="section-desc">
-    De 23 a 25 de abril &mdash; Clube de Cultura Art&iacute;stica de Campinas &mdash; Espa&ccedil;o UNIK<br />
-    Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP
-  </p>
+  <div class="galeria-header">
+    <div class="galeria-header-text">
+      <h2 class="section-title">Calend&aacute;rio de <span>Eventos</span></h2>
+      <p class="section-desc">
+        De 23 a 25 de abril &mdash; Clube de Cultura Art&iacute;stica de Campinas &mdash; Espa&ccedil;o UNIK<br />
+        Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP
+      </p>
+    </div>
+    <div class="galeria-divider"></div>
+    <div class="fotografo">
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/calendario_mcpj2j.png" alt="Calend&aacute;rio" />
+      <div class="fotografo-info">
+        <div class="fotografo-label">Calend&aacute;rio Oficial</div>
+        <div class="fotografo-nome">Programe-se!</div>
+      </div>
+    </div>
+  </div>
 
   <!-- DIA 1 -->
   <div class="sched-day">
@@ -959,16 +1039,22 @@
           <div class="sched-top">
             <div>
               <div class="sched-num">1&ordm; Evento</div>
-              <div class="sched-title">30K High Roller Business</div>
+              <div class="sched-title">40K GTD - Torneio dos Empres&aacute;rios</div>
               <div class="sched-sub">Dia &Uacute;nico</div>
             </div>
             <div class="g-badge gb-y" style="align-self:flex-start">Roller</div>
           </div>
           <div class="sched-info">
-            <div class="sched-row"><span class="gk">Buy-in</span><span class="gv-yellow">R$ 1.300 + 200</span></div>
+            <div class="sched-row"><span class="gk">Buy-in</span><span class="gv-yellow">R$ 900 + 100</span></div>
+            <div class="sched-row"><span class="gk">Fichas</span><span class="gv">20K + 20K</span></div>
+            <div class="sched-row"><span class="gk">Rebuy</span><span class="gv-yellow">R$ 900 + 100</span></div>
             <div class="sched-row"><span class="gk">Fichas</span><span class="gv">25K + 25K</span></div>
-            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">30 min</span></div>
+            <div class="sched-row"><span class="gk">Time Chip</span><span class="gv">10K</span></div>
+            <div class="sched-row"><span class="gk">Blinds</span><span class="gv">30/20 min</span></div>
             <div class="sched-row"><span class="gk">Late register</span><span class="gv">Final do 9&ordm; n&iacute;vel</span></div>
+            <div class="sched-row" style="margin-top:.5rem;border-top:1px solid rgba(245,200,0,.2);padding-top:.5rem;">
+              <span style="color:var(--yellow);font-weight:600;font-size:.9rem;">&#127860; Jantar cortesia e open bar de CHOPP at&eacute; o intervalo</span>
+            </div>
           </div>
         </div>
       </div>
@@ -990,17 +1076,20 @@
           <div class="sched-top">
             <div>
               <div class="sched-num">2&ordm; Evento</div>
-              <div class="sched-title">60K Mystery Bounty</div>
+              <div class="sched-title">50K GTD - Main Event</div>
               <div class="sched-sub">Dia 1</div>
             </div>
-            <div class="g-badge gb-r" style="align-self:flex-start">Bounty</div>
+            <div class="g-badge gb-r" style="align-self:flex-start">Main</div>
           </div>
           <div class="sched-info">
-            <div class="sched-row"><span class="gk">Buy-in Simples</span><span class="gv-yellow">R$ 130 + 20 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
-            <div class="sched-row"><span class="gk">Buy-in Duplo</span><span class="gv-yellow">R$ 260 + 40 &nbsp;|&nbsp; 20K + 15K fichas</span></div>
+            <div class="sched-row"><span class="gk">Buy-in Simples</span><span class="gv-yellow">R$ 180 + 20 &nbsp;|&nbsp; 10K + 5K fichas</span></div>
+            <div class="sched-row"><span class="gk">Buy-in Duplo</span><span class="gv-yellow">R$ 360 + 40 &nbsp;|&nbsp; 20K + 15K fichas</span></div>
             <div class="sched-row"><span class="gk">Addon</span><span class="gv">R$ 200 &nbsp;|&nbsp; 50K fichas</span></div>
             <div class="sched-row"><span class="gk">Blinds</span><span class="gv">30/20 min</span></div>
             <div class="sched-row"><span class="gk">Late register</span><span class="gv">23h50</span></div>
+            <div class="sched-row" style="margin-top:.5rem;border-top:1px solid rgba(245,200,0,.2);padding-top:.5rem;">
+              <span style="color:var(--yellow);font-weight:600;font-size:.9rem;">&#127942; Mesa Final no S&aacute;bado &agrave;s 19h</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1083,7 +1172,7 @@
           <div class="sched-top">
             <div>
               <div class="sched-num">2&ordm; Evento &mdash; continua&ccedil;&atilde;o</div>
-              <div class="sched-title">60K Mystery Bounty</div>
+              <div class="sched-title">50K GTD - Main Event</div>
               <div class="sched-sub">&#127942; Mesa Final</div>
             </div>
             <div class="g-badge gb-r" style="align-self:flex-start">Final</div>
@@ -1119,60 +1208,24 @@
 <!-- RANKING -->
 <section id="ranking">
   <div class="section-tag">Classifica&ccedil;&atilde;o</div>
-  <h2 class="section-title">Ranking de <span>Jogadores</span></h2>
-  <p class="section-desc">
-    Os maiores nomes confirmados para a 3&ordf; Etapa. Acompanhe a pontua&ccedil;&atilde;o
-    acumulada da temporada e o hist&oacute;rico de vit&oacute;rias.
-  </p>
-  <div class="score-tables-bar">
-    <button onclick="toggleScorePanel('panel-amarela')">Tabela Amarela</button>
-    <button onclick="toggleScorePanel('panel-highroller')">Tabela Roxa</button>
-    <button onclick="toggleScorePanel('panel-mainevent')">Tabela Verde</button>
+  <div class="galeria-header">
+    <div class="galeria-header-text">
+      <h2 class="section-title">Ranking de <span>Jogadores</span></h2>
+      <p class="section-desc">
+        Os maiores nomes confirmados para a 3&ordf; Etapa. Acompanhe a pontua&ccedil;&atilde;o
+        acumulada da temporada e o hist&oacute;rico de vit&oacute;rias.
+      </p>
+    </div>
+    <div class="galeria-divider"></div>
+    <div class="fotografo">
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/ranking_khfrwd.jpg" alt="Ranking" />
+      <div class="fotografo-info" style="text-align:center;">
+        <div class="fotografo-label">Arrecadado Ranking</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1;">R$ 12.000</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">em disputa</div>
+      </div>
+    </div>
   </div>
-
-  <div id="panel-amarela" class="score-panel">
-    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
-      <tr><td>1&ordm;</td><td>80</td></tr><tr><td>2&ordm;</td><td>70</td></tr>
-      <tr><td>3&ordm;</td><td>60</td></tr><tr><td>4&ordm;</td><td>40</td></tr>
-      <tr><td>5&ordm;</td><td>34</td></tr><tr><td>6&ordm;</td><td>30</td></tr>
-      <tr><td>7&ordm;</td><td>26</td></tr><tr><td>8&ordm;-9&ordm;</td><td>22</td></tr>
-      <tr><td>10&ordm;-12&ordm;</td><td>18</td></tr>
-      <tr><td>13&ordm;-15&ordm;</td><td>16</td></tr>
-      <tr><td>16&ordm;-18&ordm;</td><td>14</td></tr>
-      <tr><td>19&ordm;-27&ordm;</td><td>12</td></tr>
-      <tr><td>28&ordm;-34&ordm;</td><td>10</td></tr>
-    </tbody></table>
-    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: Last Chance, Freeroll, Super 50</p>
-  </div>
-
-  <div id="panel-highroller" class="score-panel">
-    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
-      <tr><td>1&ordm;</td><td>160</td></tr><tr><td>2&ordm;</td><td>120</td></tr>
-      <tr><td>3&ordm;</td><td>90</td></tr><tr><td>4&ordm;</td><td>70</td></tr>
-      <tr><td>5&ordm;</td><td>60</td></tr><tr><td>6&ordm;</td><td>50</td></tr>
-      <tr><td>7&ordm;</td><td>40</td></tr><tr><td>8&ordm;</td><td>34</td></tr>
-      <tr><td>9&ordm;</td><td>30</td></tr><tr><td>10&ordm;</td><td>26</td></tr>
-      <tr><td>11&ordm;-12&ordm;</td><td>26</td></tr>
-      <tr><td>13&ordm;-15&ordm;</td><td>24</td></tr>
-      <tr><td>16&ordm;-18&ordm;</td><td>22</td></tr>
-      <tr><td>19&ordm;-34&ordm;</td><td>20</td></tr>
-    </tbody></table>
-    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: High Roller</p>
-  </div>
-
-  <div id="panel-mainevent" class="score-panel">
-    <table><thead><tr><th>Pos.</th><th>Pontos</th></tr></thead><tbody>
-      <tr><td>1&ordm;</td><td>200</td></tr><tr><td>2&ordm;</td><td>160</td></tr>
-      <tr><td>3&ordm;</td><td>130</td></tr><tr><td>4&ordm;</td><td>110</td></tr>
-      <tr><td>5&ordm;</td><td>100</td></tr><tr><td>6&ordm;</td><td>90</td></tr>
-      <tr><td>7&ordm;</td><td>80</td></tr><tr><td>8&ordm;</td><td>70</td></tr>
-      <tr><td>9&ordm;</td><td>60</td></tr><tr><td>10&ordm;-18&ordm;</td><td>40</td></tr>
-      <tr><td>19&ordm;-27&ordm;</td><td>34</td></tr>
-      <tr><td>28&ordm;-34&ordm;</td><td>30</td></tr>
-    </tbody></table>
-    <p style="padding:.5rem .75rem;color:#888;font-size:.75rem;">Aplica-se a: Main Event</p>
-  </div>
-
   <div class="ranking-wrapper">
     <table>
       <thead>
@@ -1207,32 +1260,77 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="rank-1"><td><span class="rank-num">1</span></td><td><span class="player-name">Esporte da Mente</span></td><td class="prize">253</td></tr>
-        <tr class="rank-2"><td><span class="rank-num">2</span></td><td><span class="player-name">Garagentos</span></td><td class="prize">244</td></tr>
-        <tr class="rank-3"><td><span class="rank-num">3</span></td><td><span class="player-name">Arena Poker</span></td><td class="prize">204</td></tr>
-        <tr><td><span class="rank-num">4</span></td><td>Pesadelo</td><td>200</td></tr>
-        <tr><td><span class="rank-num">5</span></td><td>Suprema</td><td>192</td></tr>
-        <tr><td><span class="rank-num">6</span></td><td>Marc&atilde;o 42 Poker Team</td><td>170</td></tr>
-        <tr><td><span class="rank-num">7</span></td><td>Poker Bar&atilde;o</td><td>160</td></tr>
-        <tr><td><span class="rank-num">8</span></td><td>Leva o Restinho Team</td><td>159</td></tr>
-        <tr><td><span class="rank-num">9</span></td><td>Call por Blefe</td><td>127</td></tr>
-        <tr><td><span class="rank-num">10</span></td><td>Business Poker</td><td>115</td></tr>
-        <tr><td><span class="rank-num">11</span></td><td>Crazy Nuts</td><td>110</td></tr>
-        <tr><td><span class="rank-num">12</span></td><td>Paga o Careca</td><td>100</td></tr>
-        <tr><td><span class="rank-num">13</span></td><td>De Tudo um Poker</td><td>77</td></tr>
+        <tr class="rank-1"><td><span class="rank-num">1</span></td><td><span class="player-name">Garagentos</span></td><td class="prize">500</td></tr>
+        <tr class="rank-2"><td><span class="rank-num">2</span></td><td><span class="player-name">Pesadelo</span></td><td class="prize">416</td></tr>
+        <tr class="rank-3"><td><span class="rank-num">3</span></td><td><span class="player-name">Marc&atilde;o 42 Poker Team</span></td><td class="prize">372</td></tr>
+        <tr><td><span class="rank-num">4</span></td><td>Esporte da Mente Zero 1</td><td>358</td></tr>
+        <tr><td><span class="rank-num">5</span></td><td>Call por Blefe</td><td>337</td></tr>
+        <tr><td><span class="rank-num">6</span></td><td>Leva o Restinho Team</td><td>321</td></tr>
+        <tr><td><span class="rank-num">7</span></td><td>Business Poker</td><td>308</td></tr>
+        <tr><td><span class="rank-num">8</span></td><td>Arena Poker</td><td>305</td></tr>
+        <tr><td><span class="rank-num">9</span></td><td>Poker Bar&atilde;o</td><td>302</td></tr>
+        <tr><td><span class="rank-num">10</span></td><td>F&ecirc;nix</td><td>251</td></tr>
+        <tr><td><span class="rank-num">11</span></td><td>Suprema</td><td>192</td></tr>
+        <tr><td><span class="rank-num">12</span></td><td>Crazy Nuts</td><td>125</td></tr>
+        <tr><td><span class="rank-num">13</span></td><td>Paga o Careca</td><td>100</td></tr>
+        <tr><td><span class="rank-num">14</span></td><td>De Tudo um Poker</td><td>92</td></tr>
       </tbody>
     </table>
   </div>
 </section>
 
+<!-- GALERIA -->
+<section id="galeria">
+  <div class="section-tag">Fotos</div>
+  <div class="galeria-header">
+    <div class="galeria-header-text">
+      <h2 class="section-title">Galeria de <span>Fotos</span></h2>
+      <p class="section-desc">Momentos marcantes das etapas anteriores.</p>
+    </div>
+    <div class="galeria-divider"></div>
+    <div class="fotografo">
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/fotografo_o7in0m.png" alt="Fot&oacute;grafo oficial" />
+      <div class="fotografo-info">
+        <div class="fotografo-label">Fot&oacute;grafo Oficial</div>
+        <div class="fotografo-nome">Rafael T Silva (Raffa)</div>
+        <a href="https://www.instagram.com/letsgoraffa" target="_blank" style="color:var(--yellow);font-size:.8rem;text-decoration:none;">@letsgoraffa</a>
+      </div>
+    </div>
+  </div>
+  <div class="gallery-tabs" id="galleryTabs">
+    <p style="color:var(--text-muted);font-size:.85rem;">Carregando etapas...</p>
+  </div>
+  <div class="gallery-grid" id="galleryGrid">
+    <p class="gallery-empty">Carregando fotos...</p>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+  <img id="lightboxImg" src="" alt="Foto ampliada" />
+</div>
+
 <!-- LOCATION -->
 <section id="location">
   <div class="section-tag">Localiza&ccedil;&atilde;o</div>
-  <h2 class="section-title">Onde <span>Acontece</span></h2>
-  <p class="section-desc">
-    Estrutura exclusiva para o maior home game do interior. Ambiente premium,
-    seguran&ccedil;a total e toda a infraestrutura para os melhores jogadores.
-  </p>
+  <div class="galeria-header">
+    <div class="galeria-header-text">
+      <h2 class="section-title">Onde <span>Acontece</span></h2>
+      <p class="section-desc">
+        Estrutura exclusiva para o maior home game do interior. Ambiente premium,
+        seguran&ccedil;a total e toda a infraestrutura para os melhores jogadores.
+      </p>
+    </div>
+    <div class="galeria-divider"></div>
+    <div class="fotografo">
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/unik_oknckv.png" alt="Espa&ccedil;o UNIK" />
+      <div class="fotografo-info">
+        <div class="fotografo-label">Local Oficial</div>
+        <div class="fotografo-nome">Espa&ccedil;o UNIK</div>
+        <a href="https://www.instagram.com/espacounikeventos/" target="_blank" style="color:var(--yellow);font-size:.8rem;text-decoration:none;">@espacounikeventos</a>
+      </div>
+    </div>
+  </div>
   <div class="location-grid">
     <div class="detail-list">
       <div class="detail-item">
@@ -1277,14 +1375,12 @@
           <div class="detail-value">APP Suprema &mdash; King Online<br />Clube: <strong>747043</strong> &nbsp;|&nbsp; Agente: <strong>306618</strong></div>
         </div>
       </div>
+      <div style="margin-top:1.5rem;text-align:left;">
+        <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/apoio-removebg-preview_ijeqie.png" alt="Apoio" style="width:100%;max-width:400px;opacity:.9;display:block;" />
+      </div>
     </div>
     <div class="map-box">
-      <iframe
-        src="https://www.openstreetmap.org/export/embed.html?bbox=-47.0400%2C-22.8450%2C-47.0000%2C-22.8150&layer=mapnik&marker=-22.8300%2C-47.0200"
-        title="Mapa do evento"
-        loading="lazy"
-        allowfullscreen>
-      </iframe>
+      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/unik_ixorwz.png" alt="Espa&ccedil;o UNIK" style="width:100%;height:auto;object-fit:contain;border-radius:8px;" />
     </div>
   </div>
 </section>
@@ -1363,7 +1459,7 @@
         <textarea id="message" placeholder="Alguma d&uacute;vida ou observa&ccedil;&atilde;o?"></textarea>
       </div>
       <button type="submit" class="btn-primary" style="width:100%;font-size:1rem">
-        &#128081; Enviar Inscri&ccedil;&atilde;o
+        &#128081; Enviar Mensagem
       </button>
       <div class="toast" id="toast">
         &#10003; Inscri&ccedil;&atilde;o enviada! Entraremos em contato em breve.
@@ -1424,7 +1520,7 @@
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">&#128081; Home Game King Live</div>
-  <div class="footer-suits">&#9824; &#9829; &#9827; &#9830;</div>
+  <div class="footer-suits"><img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/apoio-removebg-preview_ijeqie.png" alt="Apoio" style="height:60px;opacity:.6;" /></div>
   <div class="footer-copy">&copy; 2026 King Live &mdash; Todos os direitos reservados.</div>
 </footer>
 
@@ -1573,6 +1669,10 @@
     });
   }
 
+  const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? ''
+    : 'https://landinghgkl-production.up.railway.app';
+
   async function loadRankingFromApi() {
     const rankingSection = document.getElementById('ranking');
     const tbody = rankingSection.querySelector('tbody');
@@ -1581,7 +1681,7 @@
     tbody.innerHTML = '<tr><td colspan="3" style="color:#888">Carregando ranking real...</td></tr>';
 
     try {
-      const response = await fetch('/ranking');
+      const response = await fetch(`${API_BASE}/ranking`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const ranking = await response.json();
@@ -1622,17 +1722,162 @@
 
   loadRankingFromApi();
 
-  function toggleScorePanel(id) {
-    const panel = document.getElementById(id);
-    const btn = document.querySelector(`.score-tables-bar button[onclick*="${id}"]`);
-    const isVisible = panel.classList.contains('visible');
-    document.querySelectorAll('.score-panel').forEach(p => p.classList.remove('visible'));
-    document.querySelectorAll('.score-tables-bar button').forEach(b => b.classList.remove('active'));
-    if (!isVisible) {
-      panel.classList.add('visible');
-      if (btn) btn.classList.add('active');
+  // ── GALERIA CLOUDINARY ──
+  let currentGalleryTab = null;
+  const CLOUD = 'dk3qmdebu';
+  const ETAPA_TAG_ALIASES = {
+    aniversariodenao: 'niverdenaao',
+    aniversariodenaao: 'niverdenaao'
+  };
+
+  function compareGalleryTags(left, right) {
+    const leftNumeric = /^etapa(\d+)$/i.exec(left.tag);
+    const rightNumeric = /^etapa(\d+)$/i.exec(right.tag);
+
+    if (leftNumeric && rightNumeric) {
+      return Number(leftNumeric[1]) - Number(rightNumeric[1]);
+    }
+
+    if (leftNumeric) return -1;
+    if (rightNumeric) return 1;
+
+    return left.label.localeCompare(right.label, 'pt-BR', { sensitivity: 'base' });
+  }
+
+  function normalizeEtapaTag(value) {
+    const normalized = String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '');
+
+    return ETAPA_TAG_ALIASES[normalized] || normalized;
+  }
+
+  function getConfiguredGalleryEtapas() {
+    try {
+      const raw = localStorage.getItem('gallery_etapas');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+
+      const result = parsed
+        .filter(e => e && typeof e.tag === 'string' && typeof e.label === 'string')
+        .map(e => ({ tag: normalizeEtapaTag(e.tag.trim()), label: e.label.trim() }))
+        .filter(e => e.tag && e.label);
+      return result;
+    } catch (err) {
+      console.error('Erro ao ler gallery_etapas:', err);
+      return [];
     }
   }
+
+  function formatEtapaLabel(tag) {
+    const numeric = /^etapa(\d+)$/i.exec(tag);
+    if (numeric) return `Etapa ${numeric[1]}`;
+    return tag
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  async function discoverGalleryEtapas() {
+    const tabs = document.getElementById('galleryTabs');
+    const configuredEtapas = getConfiguredGalleryEtapas();
+    const configuredMap = new Map();
+
+    configuredEtapas.forEach((etapa) => {
+      configuredMap.set(etapa.tag, etapa.label);
+    });
+
+    try {
+      const response = await fetch(`${API_BASE}/gallery-tags`);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const serverTags = await response.json();
+      const found = Array.isArray(serverTags)
+        ? serverTags
+            .map((item) => {
+              const tag = normalizeEtapaTag(item && item.tag);
+              const count = Number(item && item.count) || 0;
+              if (!tag || count <= 0) return null;
+
+              return {
+                tag,
+                label: configuredMap.get(tag) || formatEtapaLabel(tag),
+                count
+              };
+            })
+            .filter(Boolean)
+            .sort(compareGalleryTags)
+        : [];
+
+      if (found.length === 0) {
+        tabs.innerHTML = '';
+        document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">Nenhuma foto dispon&iacute;vel ainda.</p>';
+        return;
+      }
+
+      tabs.innerHTML = found.map(e =>
+        `<button class="gallery-tab" onclick="switchGalleryTab('${e.tag}', this)">${e.label}</button>`
+      ).join('');
+
+      const firstBtn = tabs.querySelector('.gallery-tab');
+      firstBtn.classList.add('active');
+      switchGalleryTab(found[0].tag, firstBtn);
+    } catch (err) {
+      console.error('Erro ao descobrir etapas da galeria:', err);
+      tabs.innerHTML = '';
+      document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">N&atilde;o foi poss&iacute;vel carregar as etapas da galeria.</p>';
+    }
+  }
+
+  async function loadGallery(tag) {
+    const grid = document.getElementById('galleryGrid');
+    grid.innerHTML = '<p class="gallery-empty">Carregando fotos...</p>';
+    try {
+      const res = await fetch(`${API_BASE}/gallery-photos/${encodeURIComponent(tag)}`);
+      if (!res.ok) throw new Error('Erro ao buscar fotos');
+      const data = await res.json();
+      if (!data.resources || data.resources.length === 0) {
+        grid.innerHTML = '<p class="gallery-empty">Nenhuma foto dispon&iacute;vel ainda.</p>';
+        return;
+      }
+      grid.innerHTML = data.resources.map(img => {
+        const thumb = `https://res.cloudinary.com/${CLOUD}/image/upload/c_fill,w_400,h_400,q_auto,f_auto/${img.public_id}.${img.format}`;
+        const full = img.secure_url || `https://res.cloudinary.com/${CLOUD}/image/upload/q_auto,f_auto/${img.public_id}.${img.format}`;
+        return `<img src="${thumb}" alt="Foto evento" loading="lazy" onclick="openLightbox('${full}')" />`;
+      }).join('');
+    } catch (e) {
+      console.error('Erro galeria:', e);
+      grid.innerHTML = '<p class="gallery-empty">N&atilde;o foi poss&iacute;vel carregar as fotos.</p>';
+    }
+  }
+
+  function switchGalleryTab(tag, btn) {
+    currentGalleryTab = tag;
+    document.querySelectorAll('.gallery-tab').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    loadGallery(tag);
+  }
+
+  discoverGalleryEtapas();
+
+  function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightboxImg').src = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
 </script>
 </body>
 </html>
