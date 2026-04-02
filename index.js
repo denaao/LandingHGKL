@@ -1,12 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import ranking from './ranking-data.js';
+import publicRoutes from './routes/public.js';
 
 const app = express();
 const PORT = process.env.PORT || 3010;
 
 app.use(cors());
 app.use(express.static('public'));
+
+app.use(publicRoutes);
 
 app.get('/ranking', (req, res) => {
   res.json(ranking);
