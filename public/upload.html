@@ -141,13 +141,20 @@
     const UPLOAD_PRESET = 'HGKL-etapa1';
     let currentEtapa = 'etapa1';
 
+    const ETAPA_TAG_ALIASES = {
+      aniversariodenao: 'niverdenaao',
+      aniversariodenaao: 'niverdenaao'
+    };
+
     function normalizeEtapaTag(value) {
-      return String(value || '')
+      const normalized = String(value || '')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/\s+/g, '')
         .replace(/[^a-z0-9_-]/g, '');
+
+      return ETAPA_TAG_ALIASES[normalized] || normalized;
     }
 
     function getEtapas() {
@@ -200,6 +207,7 @@
       if (etapas.some(e => e.tag === tag)) { alert('Etapa ja existe!'); return; }
       etapas.push({ tag, label: label.trim() });
       saveEtapas(etapas);
+
       currentEtapa = tag;
       renderEtapaTabs();
     }

@@ -1721,35 +1721,46 @@
   // ── GALERIA CLOUDINARY ──
   let currentGalleryTab = null;
   const CLOUD = 'dk3qmdebu';
+  const ETAPA_TAG_ALIASES = {
+    aniversariodenao: 'niverdenaao',
+    aniversariodenaao: 'niverdenaao'
+  };
+
+  function compareGalleryTags(left, right) {
+    const leftNumeric = /^etapa(\d+)$/i.exec(left.tag);
+    const rightNumeric = /^etapa(\d+)$/i.exec(right.tag);
+
+    if (leftNumeric && rightNumeric) {
+      return Number(leftNumeric[1]) - Number(rightNumeric[1]);
+    }
+
+    if (leftNumeric) return -1;
+    if (rightNumeric) return 1;
+
+    return left.label.localeCompare(right.label, 'pt-BR', { sensitivity: 'base' });
+  }
 
   function normalizeEtapaTag(value) {
-    return String(value || '')
+    const normalized = String(value || '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9_-]/g, '');
+
+    return ETAPA_TAG_ALIASES[normalized] || normalized;
   }
 
   function getConfiguredGalleryEtapas() {
     try {
       const raw = localStorage.getItem('gallery_etapas');
-      console.log('localStorage gallery_etapas raw:', raw);
-      if (!raw) {
-        console.log('gallery_etapas nao encontrado em localStorage');
-        return [];
-      }
+      if (!raw) return [];
       const parsed = JSON.parse(raw);
-      console.log('gallery_etapas parsed:', parsed);
-      if (!Array.isArray(parsed)) {
-        console.log('gallery_etapas nao eh array');
-        return [];
-      }
+      if (!Array.isArray(parsed)) return [];
 
       const result = parsed
         .filter(e => e && typeof e.tag === 'string' && typeof e.label === 'string')
         .map(e => ({ tag: normalizeEtapaTag(e.tag.trim()), label: e.label.trim() }))
         .filter(e => e.tag && e.label);
-      console.log('Etapas configuradas finais:', result);
       return result;
     } catch (err) {
       console.error('Erro ao ler gallery_etapas:', err);
@@ -1768,93 +1779,63 @@
   }
 
   async function discoverGalleryEtapas() {
-    console.log('======== INICIANDO discoverGalleryEtapas ========');
-    console.log('localStorage completo:', localStorage);
-    console.log('gallery_etapas do localStorage:', localStorage.getItem('gallery_etapas'));
-    
     const tabs = document.getElementById('galleryTabs');
-    const maxEtapas = 60;
     const configuredEtapas = getConfiguredGalleryEtapas();
-    const etapasMap = new Map();
+    const configuredMap = new Map();
 
     configuredEtapas.forEach((etapa) => {
-      etapasMap.set(etapa.tag, etapa);
+      configuredMap.set(etapa.tag, etapa.label);
     });
 
-    // Buscar tags customizadas do servidor
     try {
-      console.log('Buscando tags do servidor...');
-      const serverResponse = await fetch('/gallery-tags');
-      if (serverResponse.ok) {
-        const { tags } = await serverResponse.json();
-        console.log('Tags do servidor:', tags);
-        tags.forEach(tag => {
-          const normalized = normalizeEtapaTag(tag);
-          if (normalized && !etapasMap.has(normalized)) {
-            etapasMap.set(normalized, { tag: normalized, label: formatEtapaLabel(normalized) });
-          }
-        });
+      const response = await fetch('/gallery-tags');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
+
+      const serverTags = await response.json();
+      const found = Array.isArray(serverTags)
+        ? serverTags
+            .map((item) => {
+              const tag = normalizeEtapaTag(item && item.tag);
+              const count = Number(item && item.count) || 0;
+              if (!tag || count <= 0) return null;
+
+              return {
+                tag,
+                label: configuredMap.get(tag) || formatEtapaLabel(tag),
+                count
+              };
+            })
+            .filter(Boolean)
+            .sort(compareGalleryTags)
+        : [];
+
+      if (found.length === 0) {
+        tabs.innerHTML = '';
+        document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">Nenhuma foto dispon&iacute;vel ainda.</p>';
+        return;
+      }
+
+      tabs.innerHTML = found.map(e =>
+        `<button class="gallery-tab" onclick="switchGalleryTab('${e.tag}', this)">${e.label}</button>`
+      ).join('');
+
+      const firstBtn = tabs.querySelector('.gallery-tab');
+      firstBtn.classList.add('active');
+      switchGalleryTab(found[0].tag, firstBtn);
     } catch (err) {
-      console.error('Erro ao buscar tags do servidor:', err);
-    }
-
-    for (let i = 1; i <= maxEtapas; i++) {
-      const tag = `etapa${i}`;
-      if (!etapasMap.has(tag)) {
-        etapasMap.set(tag, { tag, label: `Etapa ${i}` });
-      }
-    }
-
-    const etapasToCheck = Array.from(etapasMap.values());
-
-    const checks = [];
-    for (const etapa of etapasToCheck) {
-      const url = `https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(etapa.tag)}.json`;
-      console.log('Verificando etapa:', etapa.tag, 'URL:', url);
-      checks.push(
-        fetch(url)
-          .then(r => {
-            return r.json().then(d => {
-              const count = (d.resources || []).length;
-              console.log('Etapa:', etapa.tag, 'Count:', count, 'Resultado:', d);
-              return { ...etapa, count };
-            }).catch(() => ({ ...etapa, count: 0 }));
-          })
-          .catch(() => ({ ...etapa, count: 0 }))
-      );
-    }
-
-    const results = await Promise.all(checks);
-    const found = results
-      .filter(r => r && r.count > 0)
-      .map(r => ({
-        tag: r.tag,
-        label: r.label || formatEtapaLabel(r.tag),
-        count: r.count
-      }));
-
-    if (found.length === 0) {
+      console.error('Erro ao descobrir etapas da galeria:', err);
       tabs.innerHTML = '';
-      document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">Nenhuma foto dispon&iacute;vel ainda.</p>';
-      return;
+      document.getElementById('galleryGrid').innerHTML = '<p class="gallery-empty">N&atilde;o foi poss&iacute;vel carregar as etapas da galeria.</p>';
     }
-
-    tabs.innerHTML = found.map(e =>
-      `<button class="gallery-tab" onclick="switchGalleryTab('${e.tag}', this)">${e.label}</button>`
-    ).join('');
-
-    // Select first tab
-    const firstBtn = tabs.querySelector('.gallery-tab');
-    firstBtn.classList.add('active');
-    switchGalleryTab(found[0].tag, firstBtn);
   }
 
   async function loadGallery(tag) {
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '<p class="gallery-empty">Carregando fotos...</p>';
     try {
-      const res = await fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(tag)}.json`);
+      const res = await fetch(`/gallery-photos/${encodeURIComponent(tag)}`);
       if (!res.ok) throw new Error('Erro ao buscar fotos');
       const data = await res.json();
       if (!data.resources || data.resources.length === 0) {
@@ -1863,7 +1844,7 @@
       }
       grid.innerHTML = data.resources.map(img => {
         const thumb = `https://res.cloudinary.com/${CLOUD}/image/upload/c_fill,w_400,h_400,q_auto,f_auto/${img.public_id}.${img.format}`;
-        const full = `https://res.cloudinary.com/${CLOUD}/image/upload/q_auto,f_auto/${img.public_id}.${img.format}`;
+        const full = img.secure_url || `https://res.cloudinary.com/${CLOUD}/image/upload/q_auto,f_auto/${img.public_id}.${img.format}`;
         return `<img src="${thumb}" alt="Foto evento" loading="lazy" onclick="openLightbox('${full}')" />`;
       }).join('');
     } catch (e) {

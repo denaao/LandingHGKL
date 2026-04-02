@@ -2,6 +2,170 @@ import { Router } from 'express';
 import db from '../db/database.js';
 
 const router = Router();
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dk3qmdebu';
+const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || '';
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || '';
+const GALLERY_TAG_ALIASES = {
+  aniversariodenao: 'niverdenaao',
+  aniversariodenaao: 'niverdenaao'
+};
+
+const CANONICAL_TAG_EQUIVALENTS = Object.entries(GALLERY_TAG_ALIASES).reduce((acc, [alias, canonical]) => {
+  if (!acc[canonical]) {
+    acc[canonical] = new Set([canonical]);
+  }
+  acc[canonical].add(alias);
+  return acc;
+}, {});
+
+function getCloudinaryAuthHeader() {
+  const token = Buffer.from(`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`).toString('base64');
+  return `Basic ${token}`;
+}
+
+function normalizeGalleryTag(value) {
+  const normalized = String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9_-]/g, '');
+
+  return GALLERY_TAG_ALIASES[normalized] || normalized;
+}
+
+async function fetchCloudinaryGalleryTags() {
+  if (!CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    const error = new Error('Cloudinary credentials are not configured');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const tagCounts = new Map();
+  let nextCursor = null;
+
+  do {
+    const url = new URL(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/image`);
+    url.searchParams.set('max_results', '500');
+    url.searchParams.set('tags', 'true');
+
+    if (nextCursor) {
+      url.searchParams.set('next_cursor', nextCursor);
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: getCloudinaryAuthHeader()
+      }
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      const error = new Error(`Cloudinary returned HTTP ${response.status}: ${detail}`);
+      error.statusCode = 502;
+      throw error;
+    }
+
+    const payload = await response.json();
+    const resources = Array.isArray(payload.resources) ? payload.resources : [];
+
+    for (const resource of resources) {
+      const tags = Array.isArray(resource.tags) ? resource.tags : [];
+      for (const rawTag of tags) {
+        const tag = normalizeGalleryTag(rawTag);
+        if (!tag) continue;
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+      }
+    }
+
+    nextCursor = payload.next_cursor || null;
+  } while (nextCursor);
+
+  return Array.from(tagCounts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .filter((item) => item.count > 0)
+    .sort((a, b) => a.tag.localeCompare(b.tag, 'pt-BR', { numeric: true, sensitivity: 'base' }));
+}
+
+function getEquivalentTagsForSearch(tag) {
+  const canonical = normalizeGalleryTag(tag);
+  if (!canonical) return [];
+
+  const equivalents = CANONICAL_TAG_EQUIVALENTS[canonical];
+  if (!equivalents) return [canonical];
+
+  return Array.from(equivalents);
+}
+
+function buildTagSearchExpression(tag) {
+  const tags = getEquivalentTagsForSearch(tag);
+  if (tags.length === 0) return '';
+
+  if (tags.length === 1) {
+    return `resource_type:image AND tags=${tags[0]}`;
+  }
+
+  const tagExpr = tags.map((currentTag) => `tags=${currentTag}`).join(' OR ');
+  return `resource_type:image AND (${tagExpr})`;
+}
+
+async function fetchCloudinaryPhotosByTag(tag) {
+  if (!CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+    const error = new Error('Cloudinary credentials are not configured');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const expression = buildTagSearchExpression(tag);
+  if (!expression) {
+    return [];
+  }
+
+  const resourcesByAsset = new Map();
+  let nextCursor = null;
+
+  do {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/resources/search`, {
+      method: 'POST',
+      headers: {
+        Authorization: getCloudinaryAuthHeader(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        expression,
+        max_results: 100,
+        next_cursor: nextCursor || undefined,
+        sort_by: [{ created_at: 'desc' }]
+      })
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      const error = new Error(`Cloudinary returned HTTP ${response.status}: ${detail}`);
+      error.statusCode = 502;
+      throw error;
+    }
+
+    const payload = await response.json();
+    const resources = Array.isArray(payload.resources) ? payload.resources : [];
+
+    for (const resource of resources) {
+      const id = resource.asset_id || `${resource.public_id}.${resource.format || 'jpg'}`;
+      if (!resourcesByAsset.has(id)) {
+        resourcesByAsset.set(id, {
+          asset_id: resource.asset_id,
+          public_id: resource.public_id,
+          format: resource.format,
+          secure_url: resource.secure_url
+        });
+      }
+    }
+
+    nextCursor = payload.next_cursor || null;
+  } while (nextCursor);
+
+  return Array.from(resourcesByAsset.values());
+}
 
 // Get team info by registration token
 router.get('/register/:token', (req, res) => {
@@ -160,50 +324,30 @@ router.get('/public/etapas/:id/tables', (req, res) => {
   res.json(tables);
 });
 
-// Get gallery tags from Cloudinary
 router.get('/gallery-tags', async (req, res) => {
   try {
-    const CLOUD_NAME = 'dk3qmdebu';
-    const API_KEY = 'dk3qmdebu';
-    const API_SECRET = 'letsgoraffa';
-    
-    const auth = Buffer.from(`${API_KEY}:${API_SECRET}`).toString('base64');
-    
-    // Fetch all resources to extract unique tags
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources?type=upload&max_results=500`, {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Basic ' + auth
-      }
-    });
-    
-    if (!response.ok) {
-      return res.json({ tags: [] });
-    }
-    
-    const data = await response.json();
-    const tagMap = {};
-    
-    // Count images per tag
-    if (data.resources) {
-      for (const resource of data.resources) {
-        const tags = resource.tags || [];
-        for (const tag of tags) {
-          tagMap[tag] = (tagMap[tag] || 0) + 1;
-        }
-      }
-    }
-    
-    // Convert to array with counts
-    const tags = Object.entries(tagMap).map(([name, count]) => ({
-      name,
-      count
-    }));
-    
-    res.json({ tags });
+    const tags = await fetchCloudinaryGalleryTags();
+    res.json(tags);
   } catch (error) {
-    console.error('Error fetching Cloudinary tags:', error);
-    res.json({ tags: [] });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: 'Nao foi possivel carregar as tags da galeria',
+      detail: error.message
+    });
+  }
+});
+
+router.get('/gallery-photos/:tag', async (req, res) => {
+  try {
+    const tag = normalizeGalleryTag(req.params.tag);
+    const resources = await fetchCloudinaryPhotosByTag(tag);
+    res.json({ resources });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      error: 'Nao foi possivel carregar as fotos da galeria',
+      detail: error.message
+    });
   }
 });
 
