@@ -1768,6 +1768,10 @@
   }
 
   async function discoverGalleryEtapas() {
+    console.log('======== INICIANDO discoverGalleryEtapas ========');
+    console.log('localStorage completo:', localStorage);
+    console.log('gallery_etapas do localStorage:', localStorage.getItem('gallery_etapas'));
+    
     const tabs = document.getElementById('galleryTabs');
     const maxEtapas = 60;
     const configuredEtapas = getConfiguredGalleryEtapas();
