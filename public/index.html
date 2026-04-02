@@ -1722,24 +1722,68 @@
   let currentGalleryTab = null;
   const CLOUD = 'dk3qmdebu';
 
+  function getConfiguredGalleryEtapas() {
+    try {
+      const raw = localStorage.getItem('gallery_etapas');
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed
+        .filter(e => e && typeof e.tag === 'string' && typeof e.label === 'string')
+        .map(e => ({ tag: e.tag.trim(), label: e.label.trim() }))
+        .filter(e => e.tag && e.label);
+    } catch {
+      return [];
+    }
+  }
+
+  function formatEtapaLabel(tag) {
+    const numeric = /^etapa(\d+)$/i.exec(tag);
+    if (numeric) return `Etapa ${numeric[1]}`;
+    return tag
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
   async function discoverGalleryEtapas() {
     const tabs = document.getElementById('galleryTabs');
     const maxEtapas = 20;
-    const found = [];
+    const configuredEtapas = getConfiguredGalleryEtapas();
+    const etapasMap = new Map();
+
+    configuredEtapas.forEach((etapa) => {
+      etapasMap.set(etapa.tag, etapa);
+    });
+
+    for (let i = 1; i <= maxEtapas; i++) {
+      const tag = `etapa${i}`;
+      if (!etapasMap.has(tag)) {
+        etapasMap.set(tag, { tag, label: `Etapa ${i}` });
+      }
+    }
+
+    const etapasToCheck = Array.from(etapasMap.values());
 
     const checks = [];
-    for (let i = 1; i <= maxEtapas; i++) {
+    for (const etapa of etapasToCheck) {
       checks.push(
-        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/etapa${i}.json`)
-          .then(r => r.ok ? r.json().then(d => ({ tag: `etapa${i}`, label: `Etapa ${i}`, count: (d.resources || []).length })) : null)
+        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${etapa.tag}.json`)
+          .then(r => r.ok ? r.json().then(d => ({ ...etapa, count: (d.resources || []).length })) : { ...etapa, count: 0 })
           .catch(() => null)
       );
     }
 
     const results = await Promise.all(checks);
-    for (const r of results) {
-      if (r && r.count > 0) found.push(r);
-    }
+    const found = results
+      .filter(r => r && r.count > 0)
+      .map(r => ({
+        tag: r.tag,
+        label: r.label || formatEtapaLabel(r.tag),
+        count: r.count
+      }));
 
     if (found.length === 0) {
       tabs.innerHTML = '';
