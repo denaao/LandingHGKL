@@ -164,10 +164,16 @@ router.get('/public/etapas/:id/tables', (req, res) => {
 router.get('/public/gallery-tags', async (req, res) => {
   try {
     const CLOUD_NAME = 'dk3qmdebu';
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/tags`, {
+    const API_KEY = 'dk3qmdebu';
+    const API_SECRET = 'letsgoraffa';
+    
+    const auth = Buffer.from(`${API_KEY}:${API_SECRET}`).toString('base64');
+    
+    // Fetch all resources to extract unique tags
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources?type=upload&max_results=500`, {
       method: 'GET',
       headers: {
-        'Authorization': 'Basic ' + Buffer.from('dk3qmdebu:letsgoraffa').toString('base64')
+        'Authorization': 'Basic ' + auth
       }
     });
     
@@ -176,9 +182,23 @@ router.get('/public/gallery-tags', async (req, res) => {
     }
     
     const data = await response.json();
-    const tags = (data.tags || [])
-      .map(tag => tag.name || tag)
-      .filter(tag => tag && typeof tag === 'string');
+    const tagMap = {};
+    
+    // Count images per tag
+    if (data.resources) {
+      for (const resource of data.resources) {
+        const tags = resource.tags || [];
+        for (const tag of tags) {
+          tagMap[tag] = (tagMap[tag] || 0) + 1;
+        }
+      }
+    }
+    
+    // Convert to array with counts
+    const tags = Object.entries(tagMap).map(([name, count]) => ({
+      name,
+      count
+    }));
     
     res.json({ tags });
   } catch (error) {
