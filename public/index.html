@@ -1777,10 +1777,18 @@
 
     const checks = [];
     for (const etapa of etapasToCheck) {
+      const url = `https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(etapa.tag)}.json`;
+      console.log('Verificando etapa:', etapa.tag, 'URL:', url);
       checks.push(
-        fetch(`https://res.cloudinary.com/${CLOUD}/image/list/${encodeURIComponent(etapa.tag)}.json`)
-          .then(r => r.ok ? r.json().then(d => ({ ...etapa, count: (d.resources || []).length })) : { ...etapa, count: 0 })
-          .catch(() => null)
+        fetch(url)
+          .then(r => {
+            return r.json().then(d => {
+              const count = (d.resources || []).length;
+              console.log('Etapa:', etapa.tag, 'Count:', count, 'Resultado:', d);
+              return { ...etapa, count };
+            }).catch(() => ({ ...etapa, count: 0 }));
+          })
+          .catch(() => ({ ...etapa, count: 0 }))
       );
     }
 
