@@ -1781,6 +1781,24 @@
       etapasMap.set(etapa.tag, etapa);
     });
 
+    // Buscar tags customizadas do servidor
+    try {
+      console.log('Buscando tags do servidor...');
+      const serverResponse = await fetch('/public/gallery-tags');
+      if (serverResponse.ok) {
+        const { tags } = await serverResponse.json();
+        console.log('Tags do servidor:', tags);
+        tags.forEach(tag => {
+          const normalized = normalizeEtapaTag(tag);
+          if (normalized && !etapasMap.has(normalized)) {
+            etapasMap.set(normalized, { tag: normalized, label: formatEtapaLabel(normalized) });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao buscar tags do servidor:', err);
+    }
+
     for (let i = 1; i <= maxEtapas; i++) {
       const tag = `etapa${i}`;
       if (!etapasMap.has(tag)) {

@@ -160,4 +160,31 @@ router.get('/public/etapas/:id/tables', (req, res) => {
   res.json(tables);
 });
 
+// Get gallery tags from Cloudinary
+router.get('/public/gallery-tags', async (req, res) => {
+  try {
+    const CLOUD_NAME = 'dk3qmdebu';
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/tags`, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from('dk3qmdebu:letsgoraffa').toString('base64')
+      }
+    });
+    
+    if (!response.ok) {
+      return res.json({ tags: [] });
+    }
+    
+    const data = await response.json();
+    const tags = (data.tags || [])
+      .map(tag => tag.name || tag)
+      .filter(tag => tag && typeof tag === 'string');
+    
+    res.json({ tags });
+  } catch (error) {
+    console.error('Error fetching Cloudinary tags:', error);
+    res.json({ tags: [] });
+  }
+});
+
 export default router;
