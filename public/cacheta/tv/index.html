@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cacheta - Ranking ao Vivo | King Jogos</title>
+<meta name="description" content="Ranking ao vivo do jogo Cacheta. Acompanhe a pontuacao em tempo real.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://kingjogos.com.br/cacheta/tv/">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230f1923'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='%23f59e0b' font-family='sans-serif' font-weight='bold'>C</text></svg>">
+<meta name="theme-color" content="#0a1219">
+
+<style>
+  :root {
+    --bg: #0a1219;
+    --bg2: #0f1923;
+    --card: #1a2733;
+    --accent: #f59e0b;
+    --accent2: #ef4444;
+    --green: #22c55e;
+    --gold: #fbbf24;
+    --silver: #9ca3af;
+    --bronze: #b45309;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #334155;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
+    color: var(--text);
+  }
+
+  .tv {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2.5vh 3vw;
+  }
+
+  /* Header */
+  .tv-head {
+    text-align: center;
+    padding-bottom: 2vh;
+    border-bottom: 3px solid var(--accent);
+    margin-bottom: 2vh;
+    flex-shrink: 0;
+  }
+  .tv-head .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+  .tv-head .logo-row svg { width: 56px; height: 56px; }
+  .tv-head h1 {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    color: var(--accent);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+  }
+  .tv-head .round {
+    font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Last round strip */
+  .last-round {
+    text-align: center;
+    padding: 1vh 2vw;
+    margin-bottom: 1.5vh;
+    background: var(--card);
+    border-radius: 10px;
+    font-size: clamp(0.8rem, 1.2vw, 1.1rem);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .lr-label { color: var(--muted); }
+  .lr-winner { color: var(--green); font-weight: 700; }
+  .lr-losers { color: var(--accent2); }
+
+  /* Ranking */
+  .ranking {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1vh, 14px);
+    overflow: hidden;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    padding: clamp(8px, 1.5vh, 22px) clamp(12px, 2vw, 32px);
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.6s ease;
+    flex-shrink: 0;
+  }
+  .row.elim { opacity: 0.2; filter: grayscale(1); }
+  .row.p1 { border-color: var(--gold); background: linear-gradient(90deg, rgba(251,191,36,0.1), var(--card)); }
+  .row.p2 { border-color: var(--silver); background: linear-gradient(90deg, rgba(156,163,175,0.06), var(--card)); }
+  .row.p3 { border-color: var(--bronze); background: linear-gradient(90deg, rgba(180,83,9,0.06), var(--card)); }
+
+  .pos {
+    font-size: clamp(1.2rem, 2.2vw, 2.2rem);
+    font-weight: 800;
+    min-width: clamp(36px, 4vw, 70px);
+    text-align: center;
+    color: var(--muted);
+  }
+  .p1 .pos { color: var(--gold); }
+  .p2 .pos { color: var(--silver); }
+  .p3 .pos { color: var(--bronze); }
+
+  .pname {
+    font-size: clamp(1rem, 2vw, 2rem);
+    font-weight: 600;
+    margin-left: clamp(8px, 1.5vw, 24px);
+    min-width: clamp(80px, 12vw, 200px);
+  }
+
+  .bar-wrap {
+    flex: 1;
+    margin: 0 clamp(8px, 1.5vw, 24px);
+    height: clamp(8px, 1.2vh, 16px);
+    background: var(--bg);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 10px;
+    transition: width 0.8s ease;
+  }
+  .row.elim .bar { background: var(--accent2); }
+
+  .ppts {
+    font-size: clamp(1.2rem, 2.5vw, 2.8rem);
+    font-weight: 800;
+    color: var(--accent);
+    min-width: clamp(40px, 5vw, 90px);
+    text-align: right;
+  }
+  .row.elim .ppts { color: var(--accent2); }
+
+  .status {
+    font-size: clamp(0.6rem, 0.9vw, 1rem);
+    padding: 3px clamp(8px, 1vw, 16px);
+    border-radius: 20px;
+    margin-left: clamp(8px, 1vw, 18px);
+    font-weight: 600;
+    min-width: clamp(60px, 7vw, 110px);
+    text-align: center;
+    white-space: nowrap;
+  }
+  .s-on { background: rgba(34,197,94,0.12); color: var(--green); }
+  .s-off { background: rgba(239,68,68,0.12); color: var(--accent2); }
+
+  /* Game over */
+  .go {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .go .trophy { font-size: clamp(3rem, 8vw, 7rem); margin-bottom: 16px; }
+  .go h2 { font-size: clamp(1.5rem, 4vw, 3.5rem); color: var(--accent); }
+  .go .champ { font-size: clamp(2rem, 5vw, 4.5rem); color: var(--green); font-weight: 800; margin-top: 8px; }
+
+  /* Waiting */
+  .waiting {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .waiting h2 { font-size: clamp(1.2rem, 2.5vw, 2.2rem); color: var(--muted); }
+  .waiting .pulse {
+    width: 12px; height: 12px; background: var(--accent);
+    border-radius: 50%; margin-top: 20px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* Footer */
+  .tv-foot {
+    text-align: center;
+    padding-top: 1.5vh;
+    border-top: 1px solid var(--border);
+    margin-top: 1.5vh;
+    color: var(--muted);
+    font-size: clamp(0.6rem, 0.8vw, 0.9rem);
+    flex-shrink: 0;
+  }
+
+  /* Slide-in animation */
+  .row { animation: slideIn 0.4s ease-out both; }
+  .row:nth-child(1) { animation-delay: 0s; }
+  .row:nth-child(2) { animation-delay: 0.05s; }
+  .row:nth-child(3) { animation-delay: 0.1s; }
+  .row:nth-child(4) { animation-delay: 0.15s; }
+  .row:nth-child(5) { animation-delay: 0.2s; }
+  .row:nth-child(6) { animation-delay: 0.25s; }
+  .row:nth-child(7) { animation-delay: 0.3s; }
+  .row:nth-child(8) { animation-delay: 0.35s; }
+  .row:nth-child(9) { animation-delay: 0.4s; }
+  .row:nth-child(10) { animation-delay: 0.45s; }
+  .row:nth-child(11) { animation-delay: 0.5s; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Mobile/small screen adjustments */
+  @media (max-width: 768px) {
+    .bar-wrap { display: none; }
+    .status { display: none; }
+    .tv { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const STORAGE_KEY = 'cachetao_v2';
+const CHANNEL_NAME = 'cachetao_sync_v2';
+const INITIAL_POINTS = 10;
+
+let bc;
+try { bc = new BroadcastChannel(CHANNEL_NAME); } catch(e) {}
+
+let state = loadState() || { players: [], round: 0, history: [], started: false, over: false, champion: null };
+let lastJSON = '';
+
+function loadState() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; }
+  catch(e) { return null; }
+}
+
+const sorted = () => [...state.players].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// Listen for BroadcastChannel messages (same browser, instant)
+if (bc) {
+  bc.onmessage = e => {
+    if (e.data.type === 'sync') { state = e.data.state; renderIfChanged(); }
+  };
+}
+
+// Listen for storage events (cross-tab fallback)
+window.addEventListener('storage', e => {
+  if (e.key === STORAGE_KEY && e.newValue) {
+    try { state = JSON.parse(e.newValue); renderIfChanged(); } catch(err) {}
+  }
+});
+
+// Polling fallback (for cross-device via shared storage, or when other events miss)
+setInterval(() => {
+  const ns = loadState();
+  if (ns) { state = ns; renderIfChanged(); }
+}, 1500);
+
+function renderIfChanged() {
+  const j = JSON.stringify(state);
+  if (j !== lastJSON) { lastJSON = j; render(); }
+}
+
+function render() {
+  const sp = sorted();
+  let h = '<div class="tv">';
+
+  // Header
+  h += `<div class="tv-head">
+    <div class="logo-row">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="20" fill="#1a2733"/>
+        <rect x="4" y="4" width="92" height="92" rx="17" fill="none" stroke="#f59e0b" stroke-width="3"/>
+        <text x="50" y="70" font-size="58" text-anchor="middle" fill="#f59e0b" font-family="sans-serif" font-weight="bold">C</text>
+      </svg>
+      <h1>CACHETA</h1>
+    </div>
+    <div class="round">${state.over ? 'FIM DE JOGO' : (state.round > 0 ? 'Rodada ' + state.round : 'Aguardando...')}</div>
+  </div>`;
+
+  // === GAME OVER ===
+  if (state.over) {
+    h += `<div class="go">
+      <div class="trophy">&#127942;</div>
+      <h2>CAMPEAO</h2>
+      <div class="champ">${esc(state.champion)}</div>
+    </div>
+    <div class="ranking" style="margin-top:2vh">
+      ${sp.map((p, i) => `<div class="row ${p.points<=0?'elim':''} ${i===0?'p1':''} ${i===1?'p2':''} ${i===2?'p3':''}">
+        <div class="pos">${i+1}</div>
+        <div class="pname">${esc(p.name)}</div>
+        <div class="ppts">${p.points}</div>
+      </div>`).join('')}
+    </div>`;
+
+  // === WAITING ===
+  } else if (!state.started || state.players.length === 0) {
+    h += `<div class="waiting">
+      <h2>Aguardando jogadores...</h2>
+      <div class="pulse"></div>
+    </div>`;
+
+  // === GAME ACTIVE ===
+  } else {
+    // Last round
+    if (state.history.length > 0) {
+      const last = state.history[state.history.length - 1];
+      h += `<div class="last-round">
+        <span class="lr-label">Ultima rodada: </span>
+        <span class="lr-winner">${esc(last.winner)} bateu!</span>
+        ${last.losers.length ? `<span class="lr-losers"> | Perderam: ${last.losers.map(esc).join(', ')}</span>` : ''}
+      </div>`;
+    }
+
+    h += '<div class="ranking">';
+    sp.forEach((p, i) => {
+      const pct = Math.max(0, (p.points / INITIAL_POINTS) * 100);
+      const el = p.points <= 0;
+      h += `<div class="row ${el?'elim':''} ${i===0?'p1':''} ${i===1?'p2':''} ${i===2?'p3':''}">
+        <div class="pos">${i+1}</div>
+        <div class="pname">${esc(p.name)}</div>
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+        <div class="ppts">${el ? '0' : p.points}</div>
+        <div class="status ${el?'s-off':'s-on'}">${el ? 'ELIMINADO' : 'ATIVO'}</div>
+      </div>`;
+    });
+    h += '</div>';
+  }
+
+  h += `<div class="tv-foot">kingjogos.com.br/cacheta</div>`;
+  h += '</div>';
+  document.getElementById('app').innerHTML = h;
+}
+
+lastJSON = JSON.stringify(state);
+render();
+</script>
+</body>
+</html>
