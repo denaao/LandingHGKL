@@ -6,9 +6,11 @@ import ranking from './ranking-data.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
+import { syncAdminCredentials } from './services/admin-bootstrap.js';
 
 const app = express();
 const PORT = process.env.PORT || 3010;
+const adminSync = syncAdminCredentials();
 
 app.use(cors());
 app.use(express.json());
@@ -67,5 +69,6 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
+  console.log(`Admin credentials ${adminSync.created ? 'created' : 'updated'} for user ${adminSync.username}`);
   console.log(`Backend KING Live Landing rodando em http://localhost:${PORT}`);
 });

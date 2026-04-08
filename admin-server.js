@@ -4,9 +4,11 @@ import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
+import { syncAdminCredentials } from './services/admin-bootstrap.js';
 
 const app = express();
 const PORT = process.env.PORT || 3011;
+const adminSync = syncAdminCredentials();
 
 app.use(cors());
 app.use(express.json());
@@ -37,5 +39,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api', publicRoutes);
 
 app.listen(PORT, () => {
+  console.log(`Admin credentials ${adminSync.created ? 'created' : 'updated'} for user ${adminSync.username}`);
   console.log(`Admin server running on port ${PORT}`);
 });
