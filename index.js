@@ -52,6 +52,7 @@ app.use((req, res, next) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', publicRoutes);
 app.use(publicRoutes);
 
 app.get('/favicon.ico', (req, res) => {
