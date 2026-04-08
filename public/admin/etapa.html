@@ -360,9 +360,9 @@
 
       const sortedSeats = [...table.seats].sort((a, b) => {
         if (a.elimination_order === null && b.elimination_order === null) return 0;
-        if (a.elimination_order === null) return -1;
-        if (b.elimination_order === null) return 1;
-        return a.elimination_order - b.elimination_order;
+        if (a.elimination_order === null) return 1;
+        if (b.elimination_order === null) return -1;
+        return b.elimination_order - a.elimination_order;
       });
 
       return `
