@@ -66,7 +66,7 @@
   <div class="modal-overlay" id="modalFinal">
     <div class="modal">
       <h2>Mesa Final — Escolher Representantes</h2>
-      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">Top 8 equipes. Selecione 1 jogador de cada equipe.</p>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">Selecione 1 jogador de cada equipe.</p>
       <div id="finalPicks"></div>
       <div class="modal-actions">
         <button class="btn" onclick="closeModal('modalFinal')">Cancelar</button>
@@ -414,10 +414,12 @@
     async function openFinalModal() {
       const res = await fetch(`/api/admin/etapas/${etapaId}/ranking`);
       const ranking = await res.json();
-      const top8 = ranking.slice(0, 8);
+      const selectedTeams = ranking.slice(0);
 
       const container = document.getElementById('finalPicks');
-      container.innerHTML = top8.map((team, i) => {
+      const instructionP = document.querySelector('#modalFinal p');
+      if (instructionP) instructionP.textContent = `Selecione 1 jogador de cada equipe (${selectedTeams.length} ${selectedTeams.length === 1 ? 'equipe' : 'equipes'}).`;
+      container.innerHTML = selectedTeams.map((team, i) => {
         const players = teamsData.find(t => t.id === team.team_id)?.players || [];
         return `
           <div class="form-group">
@@ -435,9 +437,9 @@
     async function createFinalTable() {
       const res = await fetch(`/api/admin/etapas/${etapaId}/ranking`);
       const ranking = await res.json();
-      const top8 = ranking.slice(0, 8);
+      const selectedTeams = ranking.slice(0);
 
-      const representatives = top8.map(team => ({
+      const representatives = selectedTeams.map(team => ({
         team_id: team.team_id,
         player_id: parseInt(document.getElementById(`finalPick_${team.team_id}`).value)
       }));

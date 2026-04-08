@@ -184,8 +184,8 @@ router.post('/etapas/:id/final', (req, res) => {
   const { representatives } = req.body;
   // representatives = [{ team_id, player_id }] - 8 entries
 
-  if (!representatives || representatives.length !== 8) {
-    return res.status(400).json({ error: 'Precisa de exatamente 8 representantes' });
+  if (!representatives || representatives.length < 1) {
+    return res.status(400).json({ error: 'Precisa de pelo menos 1 representante' });
   }
 
   // Check if final table already exists
