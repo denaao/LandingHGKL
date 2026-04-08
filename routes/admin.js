@@ -146,14 +146,48 @@ router.get('/etapas/:id/tables', (req, res) => {
 });
 
 router.patch('/seats/:id/eliminate', (req, res) => {
-  const { elimination_order } = req.body;
+  const rawOrder = Number(req.body?.elimination_order);
+  if (!Number.isInteger(rawOrder) || rawOrder < 1) {
+    return res.status(400).json({ error: 'Ordem de eliminação inválida' });
+  }
+
+  const elimination_order = rawOrder;
   const seat = db.prepare('SELECT s.*, t.phase, t.etapa_id FROM seats s JOIN tables_t t ON s.table_id = t.id WHERE s.id = ?').get(req.params.id);
   if (!seat) return res.status(404).json({ error: 'Seat não encontrado' });
 
   const etapa = db.prepare('SELECT status FROM etapas WHERE id = ?').get(seat.etapa_id);
   if (etapa && etapa.status === 'finished') return res.status(400).json({ error: 'Etapa encerrada. Valores congelados.' });
 
+  const alreadyEliminated = seat.elimination_order !== null;
+  if (alreadyEliminated) {
+    return res.status(400).json({ error: 'Jogador já eliminado nesta mesa' });
+  }
+
+  const expectedOrder = db.prepare(
+    'SELECT COUNT(*) as count FROM seats WHERE table_id = ? AND elimination_order IS NOT NULL'
+  ).get(seat.table_id).count + 1;
+
+  if (elimination_order !== expectedOrder) {
+    return res.status(409).json({
+      error: `Ordem inválida para esta mesa. Use a ordem ${expectedOrder}`
+    });
+  }
+
+  const duplicateOrder = db.prepare(
+    'SELECT id FROM seats WHERE table_id = ? AND elimination_order = ? LIMIT 1'
+  ).get(seat.table_id, elimination_order);
+
+  if (duplicateOrder) {
+    return res.status(409).json({
+      error: `A ordem ${elimination_order} já foi usada nesta mesa`
+    });
+  }
+
   const totalPlayers = db.prepare('SELECT COUNT(*) as count FROM seats WHERE table_id = ?').get(seat.table_id).count;
+  if (elimination_order > totalPlayers) {
+    return res.status(400).json({ error: 'Ordem de eliminação acima do total de jogadores da mesa' });
+  }
+
   const position = eliminationToPosition(elimination_order, totalPlayers);
 
   let points;
