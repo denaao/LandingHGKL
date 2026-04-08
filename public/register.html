@@ -67,6 +67,14 @@
     const token = new URLSearchParams(window.location.search).get('token');
     const content = document.getElementById('content');
 
+    async function fetchRegisterEndpoint(tokenValue, options = {}) {
+      let res = await fetch(`/register/${tokenValue}`, options);
+      if (res.status === 404) {
+        res = await fetch(`/api/register/${tokenValue}`, options);
+      }
+      return res;
+    }
+
     if (!token) {
       content.innerHTML = '<p class="closed-msg">Link invalido.</p>';
     } else {
@@ -74,7 +82,7 @@
     }
 
     async function loadTeam() {
-      const res = await fetch(`/api/register/${token}`);
+      const res = await fetchRegisterEndpoint(token);
       if (!res.ok) {
         content.innerHTML = '<p class="closed-msg">Link invalido ou expirado.</p>';
         return;
@@ -119,7 +127,7 @@
       const btn = form.querySelector('.submit-btn');
       btn.disabled = true;
 
-      const res = await fetch(`/api/register/${token}`, {
+      const res = await fetchRegisterEndpoint(token, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ players })
