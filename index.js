@@ -1,7 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
 import ranking from './ranking-data.js';
+import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
 
 const app = express();
@@ -10,6 +13,16 @@ const PORT = process.env.PORT || 3010;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'hgkl-admin-secret-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'lax'
+  }
+}));
 
 if (process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
@@ -27,6 +40,16 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+app.use((req, res, next) => {
+  const host = (req.hostname || '').toLowerCase();
+  if (host.startsWith('admin.') && req.path === '/') {
+    return res.redirect('/login.html');
+  }
+  return next();
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use(publicRoutes);
 
 app.get('/favicon.ico', (req, res) => {
