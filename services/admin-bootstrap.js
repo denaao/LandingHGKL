@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import db from '../db/database.js';
+import db from '../database.js';
 
 const DEFAULT_ADMIN_USERNAME = 'admin';
 const DEFAULT_ADMIN_PASSWORD = 'KingAdmin2026!';

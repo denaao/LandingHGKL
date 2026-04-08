@@ -1,4 +1,4 @@
-import db from './db/database.js';
+import db from './database.js';
 import { getFinalPoints } from './services/scoring.js';
 
 const etapa = db.prepare("SELECT * FROM etapas WHERE nome = 'Etapa 1'").get();

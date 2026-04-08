@@ -1,4 +1,4 @@
-import db from './db/database.js';
+import db from './database.js';
 import { getQualifyingPoints } from './services/scoring.js';
 
 // Find Etapa 1

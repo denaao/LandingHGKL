@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import db from './db/database.js';
+import db from './database.js';
 import { getQualifyingPoints, getFinalPoints } from './services/scoring.js';
 
 const etapaExists = db.prepare("SELECT * FROM etapas WHERE nome = 'Etapa 2'").get();

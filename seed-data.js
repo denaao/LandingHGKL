@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import db from './db/database.js';
+import db from './database.js';
 
 // ── ADMIN USER ──
 const username = process.env.ADMIN_USERNAME || 'admin';

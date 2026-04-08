@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import db from '../db/database.js';
+import db from '../database.js';
 
 const router = Router();
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dk3qmdebu';

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import PDFDocument from 'pdfkit';
-import db from '../db/database.js';
+import db from '../database.js';
 import { requireAuth } from '../middleware/auth.js';
 import { executeDraw } from '../services/draw.js';
 import { getQualifyingPoints, getFinalPoints, eliminationToPosition } from '../services/scoring.js';
