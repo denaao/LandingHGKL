@@ -1,15 +1,54 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, parse } from 'path';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const dbPath = process.env.DB_PATH
-  || process.env.DATABASE_PATH
-  || (process.env.NODE_ENV === 'production' ? '/app/db/hgkl.db' : join(__dirname, 'db', 'hgkl.db'));
+function resolveDbPath() {
+  const requestedPath = process.env.DB_PATH
+    || process.env.DATABASE_PATH
+    || (process.env.NODE_ENV === 'production' ? '/app/db/hgkl.db' : join(__dirname, 'db', 'hgkl.db'));
 
-const db = new Database(dbPath);
+  const parsed = parse(requestedPath);
+  const hasExtension = parsed.ext.length > 0;
+  let resolvedPath = requestedPath;
+
+  if (!hasExtension) {
+    resolvedPath = join(requestedPath, 'hgkl.db');
+  } else if (fs.existsSync(requestedPath) && fs.statSync(requestedPath).isDirectory()) {
+    // Some platforms mount volumes as directories even when a file-like path is configured.
+    resolvedPath = join(requestedPath, 'hgkl.db');
+  }
+
+  fs.mkdirSync(dirname(resolvedPath), { recursive: true });
+  return resolvedPath;
+}
+
+function openDatabase() {
+  const primaryPath = resolveDbPath();
+  const fallbacks = [
+    primaryPath,
+    '/app/db/hgkl.db',
+    '/app/hgkl.db',
+    '/tmp/hgkl.db'
+  ];
+
+  let lastError = null;
+  for (const candidate of fallbacks) {
+    try {
+      fs.mkdirSync(dirname(candidate), { recursive: true });
+      return new Database(candidate);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
+const db = openDatabase();
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
