@@ -5,3 +5,6 @@ builder = "nixpacks"
 startCommand = "node index.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[volumes]
+db = "/app/db"
