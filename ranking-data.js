@@ -136,6 +136,14 @@ const SCORE_AMARELA_BY_POSITION = {
 	34: 10,
 };
 
+const PLAYER_ALIASES = new Map([
+	["eduardoyoshi", "eduardonogueira"],
+]);
+
+const PLAYER_DISPLAY_NAMES = new Map([
+	["eduardonogueira", "Eduardo Nogueira"],
+]);
+
 const TOURNAMENTS_BY_STAGE = {
 	"Etapa 1": {
 		"Last Chance": [
@@ -374,7 +382,7 @@ function getPointsByPosition(pos, tournamentName) {
 }
 
 function normalizePlayerKey(name) {
-	return String(name || "")
+	const normalized = String(name || "")
 		.trim()
 		.replace(/\(.*?\)/g, "")
 		.normalize("NFD")
@@ -383,6 +391,8 @@ function normalizePlayerKey(name) {
 		.replace(/[^a-z0-9\s]/g, " ")
 		.replace(/\s+/g, "")
 		.trim();
+
+	return PLAYER_ALIASES.get(normalized) || normalized;
 }
 
 function buildRanking() {
@@ -397,6 +407,7 @@ function buildRanking() {
 				if (!displayName) return;
 
 				const playerKey = normalizePlayerKey(displayName);
+				const canonicalDisplayName = PLAYER_DISPLAY_NAMES.get(playerKey) || displayName;
 				if (!playerKey) return;
 
 				// Se o nome aparece duas vezes no mesmo torneio, mantemos a melhor colocacao (primeira ocorrencia).
@@ -408,7 +419,7 @@ function buildRanking() {
 
 				if (!players.has(playerKey)) {
 					players.set(playerKey, {
-						nome: displayName,
+						nome: canonicalDisplayName,
 						total: 0,
 						etapasMap: new Map(),
 					});
