@@ -11,6 +11,7 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// ── SCHEMA BASE (idempotente) ──
 db.exec(`
   CREATE TABLE IF NOT EXISTS admin (
     id INTEGER PRIMARY KEY,
@@ -58,7 +59,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS seats (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     table_id INTEGER NOT NULL REFERENCES tables_t(id),
-    player_id INTEGER NOT NULL REFERENCES players(id),
+    player_id INTEGER NOT NULL,
     elimination_order INTEGER,
     points INTEGER DEFAULT 0
   );
@@ -69,65 +70,75 @@ db.exec(`
   );
 `);
 
-// ── MIGRATION 1: Make players.team_id nullable, add etapa_team_id ──
+// ── MIGRATION 1: Recriar players com team_id nullable + etapa_team_id ──
 {
-  const cols = db.prepare('PRAGMA table_info(players)').all();
-  const hasEtapaTeamId = cols.some(c => c.name === 'etapa_team_id');
-  if (!hasEtapaTeamId) {
+  const playerCols = db.prepare('PRAGMA table_info(players)').all().map(c => c.name);
+  if (!playerCols.includes('etapa_team_id')) {
     db.pragma('foreign_keys = OFF');
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS players (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        team_id INTEGER,
-        etapa_team_id INTEGER REFERENCES etapa_teams(id),
-        nome TEXT NOT NULL
-      );
-    `);
-    // If old players table existed without etapa_team_id, recreate it
-    const oldCols = db.prepare('PRAGMA table_info(players)').all().map(c => c.name);
-    if (!oldCols.includes('etapa_team_id')) {
-      db.exec(`
-        ALTER TABLE players RENAME TO players_old;
-        CREATE TABLE players (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          team_id INTEGER,
-          etapa_team_id INTEGER REFERENCES etapa_teams(id),
-          nome TEXT NOT NULL
-        );
-        INSERT INTO players (id, team_id, nome) SELECT id, team_id, nome FROM players_old;
-        DROP TABLE players_old;
-      `);
+    try {
+      // Se players existe (schema antigo), migra. Se não existe, cria do zero.
+      if (playerCols.length > 0) {
+        db.exec(`
+          CREATE TABLE players_mig (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id INTEGER,
+            etapa_team_id INTEGER,
+            nome TEXT NOT NULL
+          );
+          INSERT INTO players_mig (id, team_id, nome)
+            SELECT id, team_id, nome FROM players;
+          DROP TABLE players;
+          ALTER TABLE players_mig RENAME TO players;
+        `);
+      } else {
+        db.exec(`
+          CREATE TABLE players (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            team_id INTEGER,
+            etapa_team_id INTEGER,
+            nome TEXT NOT NULL
+          );
+        `);
+      }
+    } catch (e) {
+      console.error('[DB Migration 1] Erro ao recriar players:', e.message);
     }
     db.pragma('foreign_keys = ON');
   }
 }
 
-// ── MIGRATION 2: Move teams -> global_teams + etapa_teams ──
+// ── MIGRATION 2: Mover teams -> global_teams + etapa_teams ──
 {
   const globalCount = db.prepare('SELECT COUNT(*) as cnt FROM global_teams').get().cnt;
   const oldTeamCount = db.prepare('SELECT COUNT(*) as cnt FROM teams').get().cnt;
 
   if (globalCount === 0 && oldTeamCount > 0) {
-    db.transaction(() => {
-      const oldTeams = db.prepare('SELECT * FROM teams ORDER BY id').all();
-      for (const team of oldTeams) {
-        let gt = db.prepare('SELECT id FROM global_teams WHERE nome = ?').get(team.nome);
-        if (!gt) {
-          const r = db.prepare('INSERT INTO global_teams (nome) VALUES (?)').run(team.nome);
-          gt = { id: r.lastInsertRowid };
+    try {
+      db.transaction(() => {
+        const oldTeams = db.prepare('SELECT * FROM teams ORDER BY id').all();
+        const insertGt = db.prepare('INSERT OR IGNORE INTO global_teams (nome) VALUES (?)');
+        const findGt   = db.prepare('SELECT id FROM global_teams WHERE nome = ?');
+        const insertEt = db.prepare(
+          'INSERT OR IGNORE INTO etapa_teams (etapa_id, global_team_id, registration_token) VALUES (?, ?, ?)'
+        );
+        const findEt   = db.prepare('SELECT id FROM etapa_teams WHERE etapa_id = ? AND global_team_id = ?');
+        const updPl    = db.prepare('UPDATE players SET etapa_team_id = ? WHERE team_id = ?');
+
+        for (const team of oldTeams) {
+          insertGt.run(team.nome);
+          const gt = findGt.get(team.nome);
+          insertEt.run(team.etapa_id, gt.id, team.registration_token);
+          const et = findEt.get(team.etapa_id, gt.id);
+          updPl.run(et.id, team.id);
         }
-        let et = db.prepare('SELECT id FROM etapa_teams WHERE etapa_id = ? AND global_team_id = ?').get(team.etapa_id, gt.id);
-        if (!et) {
-          const r = db.prepare('INSERT INTO etapa_teams (etapa_id, global_team_id, registration_token) VALUES (?, ?, ?)').run(team.etapa_id, gt.id, team.registration_token);
-          et = { id: r.lastInsertRowid };
-        }
-        db.prepare('UPDATE players SET etapa_team_id = ? WHERE team_id = ?').run(et.id, team.id);
-      }
-    })();
+      })();
+    } catch (e) {
+      console.error('[DB Migration 2] Erro ao migrar teams:', e.message);
+    }
   }
 }
 
-// ── SEED: Pontos históricos (antes das etapas no banco) ──
+// ── SEED: Pontos históricos (antes do sistema de etapas) ──
 const seedBase = db.prepare('INSERT OR IGNORE INTO team_base_points (team_nome, points) VALUES (?, ?)');
 db.transaction(() => {
   for (const [nome, pts] of [
