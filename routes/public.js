@@ -298,6 +298,19 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
   res.json(ranking);
 });
 
+// Nomes variantes que devem ser tratados como o mesmo time
+const TEAM_NAME_ALIASES = {
+  'Esporte da mente 01':  'Esporte da Mente Zero 1',
+  'Leva o restinho':      'Leva o Restinho Team',
+  'Bussines Poker':       'Business Poker',
+  'Fenix Poker':          'Fênix',
+  'Barão Poker':          'Poker Barão',
+};
+
+function canonicalTeamName(nome) {
+  return TEAM_NAME_ALIASES[nome] || nome;
+}
+
 router.get('/public/ranking-geral', (req, res) => {
   // Pontos históricos (antes do sistema de etapas)
   const teamTotals = {};
@@ -326,11 +339,12 @@ router.get('/public/ranking-geral', (req, res) => {
 
       if (pts.total <= 0) continue;
 
-      if (!teamTotals[team.team_nome]) {
-        teamTotals[team.team_nome] = { team_nome: team.team_nome, total_points: 0, etapas: [] };
+      const canonical = canonicalTeamName(team.team_nome);
+      if (!teamTotals[canonical]) {
+        teamTotals[canonical] = { team_nome: canonical, total_points: 0, etapas: [] };
       }
-      teamTotals[team.team_nome].total_points += pts.total;
-      teamTotals[team.team_nome].etapas.push({ nome: etapa.nome, points: pts.total });
+      teamTotals[canonical].total_points += pts.total;
+      teamTotals[canonical].etapas.push({ nome: etapa.nome, points: pts.total });
     }
   }
 
