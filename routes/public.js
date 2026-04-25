@@ -343,10 +343,11 @@ router.get('/public/etapas/:id/tables', (req, res) => {
     table.seats = db.prepare(`
       SELECT s.id as seat_id, s.elimination_order, s.points,
              p.id as player_id, p.nome as player_nome,
-             t.id as team_id, t.nome as team_nome
+             gt.id as team_id, gt.nome as team_nome
       FROM seats s
       JOIN players p ON s.player_id = p.id
-      JOIN teams t ON p.team_id = t.id
+      JOIN etapa_teams et ON p.etapa_team_id = et.id
+      JOIN global_teams gt ON et.global_team_id = gt.id
       WHERE s.table_id = ?
       ORDER BY s.id
     `).all(table.id);
@@ -361,28 +362,38 @@ router.get('/public/etapas/:id/report', (req, res) => {
   const etapa = db.prepare('SELECT * FROM etapas WHERE id = ?').get(etapaId);
   if (!etapa) return res.status(404).send('<h1>Etapa não encontrada</h1>');
 
-  const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ? ORDER BY id').all(etapaId);
+  const teams = db.prepare(`
+    SELECT et.id as etapa_team_id, gt.nome
+    FROM etapa_teams et
+    JOIN global_teams gt ON et.global_team_id = gt.id
+    WHERE et.etapa_id = ?
+    ORDER BY et.id
+  `).all(etapaId);
+
   const tables = db.prepare('SELECT * FROM tables_t WHERE etapa_id = ? ORDER BY phase, numero').all(etapaId);
 
   for (const table of tables) {
     table.seats = db.prepare(`
-      SELECT s.*, p.nome as player_nome, t.nome as team_nome,
+      SELECT s.*, p.nome as player_nome, gt.nome as team_nome,
              ((SELECT COUNT(*) FROM seats WHERE table_id = s.table_id) + 1 - s.elimination_order) as position
-      FROM seats s JOIN players p ON s.player_id = p.id JOIN teams t ON p.team_id = t.id
+      FROM seats s
+      JOIN players p ON s.player_id = p.id
+      JOIN etapa_teams et ON p.etapa_team_id = et.id
+      JOIN global_teams gt ON et.global_team_id = gt.id
       WHERE s.table_id = ? ORDER BY CASE WHEN s.elimination_order IS NULL THEN 0 ELSE 1 END, s.elimination_order DESC
     `).all(table.id);
   }
 
   const ranking = [];
   for (const team of teams) {
-    const qp = db.prepare(`SELECT COALESCE(SUM(s.points),0) as total FROM seats s JOIN tables_t t ON s.table_id=t.id JOIN players p ON s.player_id=p.id WHERE p.team_id=? AND t.etapa_id=? AND t.phase='qualifying'`).get(team.id, etapaId);
-    const fp = db.prepare(`SELECT COALESCE(SUM(s.points),0) as total FROM seats s JOIN tables_t t ON s.table_id=t.id JOIN players p ON s.player_id=p.id WHERE p.team_id=? AND t.etapa_id=? AND t.phase='final'`).get(team.id, etapaId);
+    const qp = db.prepare(`SELECT COALESCE(SUM(s.points),0) as total FROM seats s JOIN tables_t t ON s.table_id=t.id JOIN players p ON s.player_id=p.id WHERE p.etapa_team_id=? AND t.etapa_id=? AND t.phase='qualifying'`).get(team.etapa_team_id, etapaId);
+    const fp = db.prepare(`SELECT COALESCE(SUM(s.points),0) as total FROM seats s JOIN tables_t t ON s.table_id=t.id JOIN players p ON s.player_id=p.id WHERE p.etapa_team_id=? AND t.etapa_id=? AND t.phase='final'`).get(team.etapa_team_id, etapaId);
     const details = db.prepare(`
       SELECT p.nome as player_nome, tb.numero as mesa, tb.phase, s.points,
              ((SELECT COUNT(*) FROM seats WHERE table_id=s.table_id)+1-s.elimination_order) as position
       FROM seats s JOIN players p ON s.player_id=p.id JOIN tables_t tb ON s.table_id=tb.id
-      WHERE p.team_id=? AND tb.etapa_id=? AND s.elimination_order IS NOT NULL ORDER BY tb.phase, tb.numero
-    `).all(team.id, etapaId);
+      WHERE p.etapa_team_id=? AND tb.etapa_id=? AND s.elimination_order IS NOT NULL ORDER BY tb.phase, tb.numero
+    `).all(team.etapa_team_id, etapaId);
     ranking.push({ nome: team.nome, qualifying: qp.total, final: fp.total, total: qp.total + fp.total, details });
   }
   ranking.sort((a, b) => b.total - a.total);
