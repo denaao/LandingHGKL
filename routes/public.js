@@ -169,53 +169,78 @@ async function fetchCloudinaryPhotosByTag(tag) {
 
 // Get team info by registration token
 router.get('/register/:token', (req, res) => {
-  const team = db.prepare(`
-    SELECT t.*, e.nome as etapa_nome, e.status as etapa_status
-    FROM teams t
-    JOIN etapas e ON t.etapa_id = e.id
-    WHERE t.registration_token = ?
+  // Tenta primeiro na nova estrutura (etapa_teams)
+  let etapaTeam = db.prepare(`
+    SELECT et.id, et.etapa_id, gt.nome, e.nome as etapa_nome, e.status as etapa_status,
+           et.registration_token
+    FROM etapa_teams et
+    JOIN global_teams gt ON et.global_team_id = gt.id
+    JOIN etapas e ON et.etapa_id = e.id
+    WHERE et.registration_token = ?
   `).get(req.params.token);
 
-  if (!team) return res.status(404).json({ error: 'Link inválido' });
+  // Fallback para estrutura antiga (teams) se não encontrar
+  if (!etapaTeam) {
+    const oldTeam = db.prepare(`
+      SELECT t.id, t.etapa_id, t.nome, e.nome as etapa_nome, e.status as etapa_status,
+             t.registration_token
+      FROM teams t JOIN etapas e ON t.etapa_id = e.id
+      WHERE t.registration_token = ?
+    `).get(req.params.token);
+    if (!oldTeam) return res.status(404).json({ error: 'Link inválido' });
+    const players = db.prepare('SELECT * FROM players WHERE team_id = ? ORDER BY id').all(oldTeam.id);
+    return res.json({ ...oldTeam, players });
+  }
 
-  const players = db.prepare('SELECT * FROM players WHERE team_id = ? ORDER BY id').all(team.id);
-  res.json({ ...team, players });
+  const players = db.prepare('SELECT * FROM players WHERE etapa_team_id = ? ORDER BY id').all(etapaTeam.id);
+  res.json({ ...etapaTeam, players });
 });
 
 // Register players for a team
 router.post('/register/:token', (req, res) => {
-  const team = db.prepare(`
-    SELECT t.*, e.status as etapa_status
-    FROM teams t
-    JOIN etapas e ON t.etapa_id = e.id
-    WHERE t.registration_token = ?
+  // Tenta nova estrutura
+  let etapaTeam = db.prepare(`
+    SELECT et.id, et.etapa_id, e.status as etapa_status
+    FROM etapa_teams et
+    JOIN etapas e ON et.etapa_id = e.id
+    WHERE et.registration_token = ?
   `).get(req.params.token);
 
-  if (!team) return res.status(404).json({ error: 'Link inválido' });
-  if (team.etapa_status !== 'registration') {
+  // Fallback para estrutura antiga
+  if (!etapaTeam) {
+    const oldTeam = db.prepare(`
+      SELECT t.id, t.etapa_id, e.status as etapa_status
+      FROM teams t JOIN etapas e ON t.etapa_id = e.id
+      WHERE t.registration_token = ?
+    `).get(req.params.token);
+    if (!oldTeam) return res.status(404).json({ error: 'Link inválido' });
+    if (oldTeam.etapa_status !== 'registration') return res.status(400).json({ error: 'Inscrições encerradas para esta etapa' });
+    const { players } = req.body;
+    if (!players || players.length !== 8) return res.status(400).json({ error: 'Precisa de exatamente 8 jogadores' });
+    for (const name of players) { if (!name?.trim()) return res.status(400).json({ error: 'Todos os nomes são obrigatórios' }); }
+    db.transaction(() => {
+      db.prepare('DELETE FROM players WHERE team_id = ?').run(oldTeam.id);
+      const ins = db.prepare('INSERT INTO players (team_id, nome) VALUES (?, ?)');
+      for (const name of players) ins.run(oldTeam.id, name.trim());
+    })();
+    return res.json({ ok: true });
+  }
+
+  if (etapaTeam.etapa_status !== 'registration') {
     return res.status(400).json({ error: 'Inscrições encerradas para esta etapa' });
   }
 
   const { players } = req.body;
-  if (!players || players.length !== 8) {
-    return res.status(400).json({ error: 'Precisa de exatamente 8 jogadores' });
-  }
-
+  if (!players || players.length !== 8) return res.status(400).json({ error: 'Precisa de exatamente 8 jogadores' });
   for (const name of players) {
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Todos os nomes são obrigatórios' });
-    }
+    if (!name?.trim()) return res.status(400).json({ error: 'Todos os nomes são obrigatórios' });
   }
 
-  // Remove existing players and add new ones
-  const transaction = db.transaction(() => {
-    db.prepare('DELETE FROM players WHERE team_id = ?').run(team.id);
-    const insert = db.prepare('INSERT INTO players (team_id, nome) VALUES (?, ?)');
-    for (const name of players) {
-      insert.run(team.id, name.trim());
-    }
-  });
-  transaction();
+  db.transaction(() => {
+    db.prepare('DELETE FROM players WHERE etapa_team_id = ?').run(etapaTeam.id);
+    const ins = db.prepare('INSERT INTO players (etapa_team_id, nome) VALUES (?, ?)');
+    for (const name of players) ins.run(etapaTeam.id, name.trim());
+  })();
 
   res.json({ ok: true });
 });
@@ -229,40 +254,39 @@ router.get('/public/etapas', (req, res) => {
 
 router.get('/public/etapas/:id/ranking', (req, res) => {
   const etapaId = req.params.id;
-  const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ? ORDER BY id').all(etapaId);
+  const teams = db.prepare(`
+    SELECT et.id as team_id, gt.nome as team_nome
+    FROM etapa_teams et
+    JOIN global_teams gt ON et.global_team_id = gt.id
+    WHERE et.etapa_id = ?
+    ORDER BY et.id
+  `).all(etapaId);
   const ranking = [];
 
   for (const team of teams) {
     const qualifyingPoints = db.prepare(`
       SELECT COALESCE(SUM(s.points), 0) as total
-      FROM seats s
-      JOIN tables_t t ON s.table_id = t.id
-      JOIN players p ON s.player_id = p.id
-      WHERE p.team_id = ? AND t.etapa_id = ? AND t.phase = 'qualifying'
-    `).get(team.id, etapaId);
+      FROM seats s JOIN tables_t t ON s.table_id = t.id JOIN players p ON s.player_id = p.id
+      WHERE p.etapa_team_id = ? AND t.etapa_id = ? AND t.phase = 'qualifying'
+    `).get(team.team_id, etapaId);
 
     const finalPoints = db.prepare(`
       SELECT COALESCE(SUM(s.points), 0) as total
-      FROM seats s
-      JOIN tables_t t ON s.table_id = t.id
-      JOIN players p ON s.player_id = p.id
-      WHERE p.team_id = ? AND t.etapa_id = ? AND t.phase = 'final'
-    `).get(team.id, etapaId);
+      FROM seats s JOIN tables_t t ON s.table_id = t.id JOIN players p ON s.player_id = p.id
+      WHERE p.etapa_team_id = ? AND t.etapa_id = ? AND t.phase = 'final'
+    `).get(team.team_id, etapaId);
 
     const playerDetails = db.prepare(`
-      SELECT p.nome as player_nome, tb.numero as mesa,
-             tb.phase, s.elimination_order, s.points,
+      SELECT p.nome as player_nome, tb.numero as mesa, tb.phase, s.points,
              ((SELECT COUNT(*) FROM seats WHERE table_id = s.table_id) + 1 - s.elimination_order) as position
-      FROM seats s
-      JOIN players p ON s.player_id = p.id
-      JOIN tables_t tb ON s.table_id = tb.id
-      WHERE p.team_id = ? AND tb.etapa_id = ? AND s.elimination_order IS NOT NULL
+      FROM seats s JOIN players p ON s.player_id = p.id JOIN tables_t tb ON s.table_id = tb.id
+      WHERE p.etapa_team_id = ? AND tb.etapa_id = ? AND s.elimination_order IS NOT NULL
       ORDER BY tb.phase, tb.numero
-    `).all(team.id, etapaId);
+    `).all(team.team_id, etapaId);
 
     ranking.push({
-      team_id: team.id,
-      team_nome: team.nome,
+      team_id: team.team_id,
+      team_nome: team.team_nome,
       qualifying_points: qualifyingPoints.total,
       final_points: finalPoints.total,
       total_points: qualifyingPoints.total + finalPoints.total,
@@ -274,59 +298,43 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
   res.json(ranking);
 });
 
-// Normaliza nome de equipe para chave de alias (remove acentos, espaços, lowercase)
-function normalizeTeamKey(nome) {
-  return String(nome || '')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-
 router.get('/public/ranking-geral', (req, res) => {
-  // Carrega aliases do banco
-  const aliasRows = db.prepare('SELECT alias, canonical_nome FROM team_aliases').all();
-  const aliasMap = {};
-  for (const row of aliasRows) aliasMap[row.alias] = row.canonical_nome;
-
-  function canonicalName(nome) {
-    const key = normalizeTeamKey(nome);
-    return aliasMap[key] || nome;
-  }
-
-  // Começa com pontos históricos (base)
+  // Pontos históricos (antes do sistema de etapas)
   const teamTotals = {};
-  const baseRows = db.prepare('SELECT team_nome, points FROM team_base_points').all();
-  for (const row of baseRows) {
+  for (const row of db.prepare('SELECT team_nome, points FROM team_base_points').all()) {
     teamTotals[row.team_nome] = { team_nome: row.team_nome, total_points: row.points, etapas: [] };
   }
 
-  // Soma pontos de todas as etapas finalizadas no banco
+  // Soma pontos das etapas finalizadas usando global_teams (nome canônico garantido)
   const etapas = db.prepare("SELECT * FROM etapas WHERE status = 'finished' ORDER BY id").all();
   for (const etapa of etapas) {
-    const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ?').all(etapa.id);
+    const teams = db.prepare(`
+      SELECT et.id as etapa_team_id, gt.nome as team_nome
+      FROM etapa_teams et
+      JOIN global_teams gt ON et.global_team_id = gt.id
+      WHERE et.etapa_id = ?
+    `).all(etapa.id);
+
     for (const team of teams) {
       const pts = db.prepare(`
         SELECT COALESCE(SUM(s.points), 0) as total
         FROM seats s
         JOIN tables_t t ON s.table_id = t.id
         JOIN players p ON s.player_id = p.id
-        WHERE p.team_id = ? AND t.etapa_id = ?
-      `).get(team.id, etapa.id);
+        WHERE p.etapa_team_id = ? AND t.etapa_id = ?
+      `).get(team.etapa_team_id, etapa.id);
 
       if (pts.total <= 0) continue;
 
-      const canonical = canonicalName(team.nome);
-      if (!teamTotals[canonical]) {
-        teamTotals[canonical] = { team_nome: canonical, total_points: 0, etapas: [] };
+      if (!teamTotals[team.team_nome]) {
+        teamTotals[team.team_nome] = { team_nome: team.team_nome, total_points: 0, etapas: [] };
       }
-      teamTotals[canonical].total_points += pts.total;
-      teamTotals[canonical].etapas.push({ nome: etapa.nome, points: pts.total });
+      teamTotals[team.team_nome].total_points += pts.total;
+      teamTotals[team.team_nome].etapas.push({ nome: etapa.nome, points: pts.total });
     }
   }
 
-  const ranking = Object.values(teamTotals)
-    .sort((a, b) => b.total_points - a.total_points);
-
-  res.json(ranking);
+  res.json(Object.values(teamTotals).sort((a, b) => b.total_points - a.total_points));
 });
 
 router.get('/public/etapas/:id/tables', (req, res) => {
