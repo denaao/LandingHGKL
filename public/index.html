@@ -1241,22 +1241,8 @@
           <th>Pontos</th>
         </tr>
       </thead>
-      <tbody>
-        <tr class="rank-1"><td><span class="rank-num">1</span></td><td><span class="player-name">Garagentos</span></td><td class="prize">684</td></tr>
-        <tr class="rank-2"><td><span class="rank-num">2</span></td><td><span class="player-name">Pesadelo</span></td><td class="prize">644</td></tr>
-        <tr class="rank-3"><td><span class="rank-num">3</span></td><td><span class="player-name">Esporte da Mente Zero 1</span></td><td class="prize">548</td></tr>
-        <tr><td><span class="rank-num">4</span></td><td>Poker Bar&atilde;o</td><td>526</td></tr>
-        <tr><td><span class="rank-num">5</span></td><td>Business Poker</td><td>460</td></tr>
-        <tr><td><span class="rank-num">6</span></td><td>Leva o Restinho Team</td><td>454</td></tr>
-        <tr><td><span class="rank-num">7</span></td><td>F&ecirc;nix</td><td>453</td></tr>
-        <tr><td><span class="rank-num">8</span></td><td>Marc&atilde;o 42 Poker Team</td><td>372</td></tr>
-        <tr><td><span class="rank-num">9</span></td><td>Call por Blefe</td><td>337</td></tr>
-        <tr><td><span class="rank-num">10</span></td><td>Arena Poker</td><td>305</td></tr>
-        <tr><td><span class="rank-num">11</span></td><td>Suprema</td><td>192</td></tr>
-        <tr><td><span class="rank-num">12</span></td><td>Ghost Poker</td><td>169</td></tr>
-        <tr><td><span class="rank-num">13</span></td><td>Crazy Nuts</td><td>125</td></tr>
-        <tr><td><span class="rank-num">14</span></td><td>Paga o Careca</td><td>100</td></tr>
-        <tr><td><span class="rank-num">15</span></td><td>De Tudo um Poker</td><td>92</td></tr>
+      <tbody id="hg-ranking-tbody">
+        <tr><td colspan="3" style="color:#888;text-align:center">Carregando ranking...</td></tr>
       </tbody>
     </table>
   </div>
@@ -1704,6 +1690,27 @@
   }
 
   loadRankingFromApi();
+
+  // ── RANKING BATALHA DE HOME GAMES ──
+  async function loadHgRanking() {
+    const tbody = document.getElementById('hg-ranking-tbody');
+    if (!tbody) return;
+    try {
+      const res = await fetch('/api/public/ranking-geral');
+      if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+      const ranking = await res.json();
+      const medalClass = ['rank-1', 'rank-2', 'rank-3'];
+      tbody.innerHTML = ranking.map((team, i) => {
+        const cls = i < 3 ? ` class="${medalClass[i]}"` : '';
+        const nameCls = i < 3 ? `<span class="player-name">${team.team_nome}</span>` : team.team_nome;
+        const ptsCls = i < 3 ? `class="prize"` : '';
+        return `<tr${cls}><td><span class="rank-num">${i + 1}</span></td><td>${nameCls}</td><td ${ptsCls}>${team.total_points}</td></tr>`;
+      }).join('');
+    } catch (e) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c;text-align:center">Erro ao carregar ranking.</td></tr>';
+    }
+  }
+  loadHgRanking();
 
   // ── GALERIA CLOUDINARY ──
   let currentGalleryTab = null;

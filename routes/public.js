@@ -274,10 +274,33 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
   res.json(ranking);
 });
 
-router.get('/public/ranking-geral', (req, res) => {
-  const etapas = db.prepare("SELECT * FROM etapas ORDER BY id").all();
-  const teamTotals = {};
+// Normaliza nome de equipe para chave de alias (remove acentos, espaços, lowercase)
+function normalizeTeamKey(nome) {
+  return String(nome || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
+router.get('/public/ranking-geral', (req, res) => {
+  // Carrega aliases do banco
+  const aliasRows = db.prepare('SELECT alias, canonical_nome FROM team_aliases').all();
+  const aliasMap = {};
+  for (const row of aliasRows) aliasMap[row.alias] = row.canonical_nome;
+
+  function canonicalName(nome) {
+    const key = normalizeTeamKey(nome);
+    return aliasMap[key] || nome;
+  }
+
+  // Começa com pontos históricos (base)
+  const teamTotals = {};
+  const baseRows = db.prepare('SELECT team_nome, points FROM team_base_points').all();
+  for (const row of baseRows) {
+    teamTotals[row.team_nome] = { team_nome: row.team_nome, total_points: row.points, etapas: [] };
+  }
+
+  // Soma pontos de todas as etapas finalizadas no banco
+  const etapas = db.prepare("SELECT * FROM etapas WHERE status = 'finished' ORDER BY id").all();
   for (const etapa of etapas) {
     const teams = db.prepare('SELECT * FROM teams WHERE etapa_id = ?').all(etapa.id);
     for (const team of teams) {
@@ -289,19 +312,18 @@ router.get('/public/ranking-geral', (req, res) => {
         WHERE p.team_id = ? AND t.etapa_id = ?
       `).get(team.id, etapa.id);
 
-      const key = team.nome;
-      if (!teamTotals[key]) {
-        teamTotals[key] = { team_nome: team.nome, total_points: 0, etapas: [] };
+      if (pts.total <= 0) continue;
+
+      const canonical = canonicalName(team.nome);
+      if (!teamTotals[canonical]) {
+        teamTotals[canonical] = { team_nome: canonical, total_points: 0, etapas: [] };
       }
-      if (pts.total > 0) {
-        teamTotals[key].total_points += pts.total;
-        teamTotals[key].etapas.push({ nome: etapa.nome, points: pts.total });
-      }
+      teamTotals[canonical].total_points += pts.total;
+      teamTotals[canonical].etapas.push({ nome: etapa.nome, points: pts.total });
     }
   }
 
   const ranking = Object.values(teamTotals)
-    .filter(t => t.total_points > 0)
     .sort((a, b) => b.total_points - a.total_points);
 
   res.json(ranking);
