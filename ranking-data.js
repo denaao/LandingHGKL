@@ -136,12 +136,43 @@ const SCORE_AMARELA_BY_POSITION = {
 	34: 10,
 };
 
+// Pontuação High Roller com chop de 1º/2º lugar (ambos recebem 120 pts)
+const SCORE_HIGH_ROLLER_CHOP_BY_POSITION = {
+	1: 120,
+	2: 120,
+	3: 90,
+	4: 70,
+	5: 60,
+	6: 50,
+	7: 40,
+	8: 34,
+	9: 30,
+	10: 26,
+	11: 26,
+	12: 26,
+	13: 24,
+	14: 24,
+	15: 24,
+	16: 22,
+	17: 22,
+	18: 22,
+	19: 20,
+	20: 20,
+	21: 20,
+	22: 20,
+	23: 20,
+	24: 20,
+};
+
 const PLAYER_ALIASES = new Map([
 	["eduardoyoshi", "eduardonogueira"],
+	["wielis", "wlelis"],
+	["lucianotakahashi", "lucianotaka"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
 	["eduardonogueira", "Eduardo Nogueira"],
+	["lucianotaka", "Luciano Takahashi"],
 ]);
 
 const TOURNAMENTS_BY_STAGE = {
@@ -361,9 +392,66 @@ const TOURNAMENTS_BY_STAGE = {
 			"Andre Moura Tarifa",
 		],
 	},
+	"Etapa 3": {
+		"High Roller": [
+			"Pedro Santos",
+			"Botinha Andrey",
+			"Leandro Magui",
+			"Rodrigo Clemente",
+			"Henry Julian Samurai",
+			"Marco Antonio Cheida",
+			"Andre Gama",
+			"Edir Caldeira Da Silva",
+			"Wlelis",
+			"Luzia Serafim",
+			"Denao King",
+			"Henrique Lorençco",
+			"Kleber Savoya",
+			"Lazaro Cesar Siqueira",
+			"Volnei Serafim",
+			"Marcos Assis",
+			"Rafael Cunha",
+			"Geraldo Magela",
+			"Douglas Soler",
+			"Rafael Marcos Dos Santos",
+			"Luciano Takahashi",
+			"Anderson Francisquino",
+			"Andre Moura Tarifa",
+		],
+		"Freeroll": [
+			"Eduardo Nogueira",
+			"Lucas Antonio Manesco",
+			"Joao Claudio Jr",
+			"Bruno Curan",
+			"Arthur Peres De Lima",
+			"Joao Rodrigo Nickel",
+			"Wellington Andrade Da Silva",
+			"Jonathas Castelani",
+			"Leonardo Rosa Simao",
+			"Giordano Casteleti",
+			"Zeino Avila",
+			"Emily Rossi Rodrigues",
+			"Adriano Said",
+			"Felipe Pires Dos Reis",
+			"Jonathas Sebastiao De Souza",
+			"Wlelis",
+			"Fabricio Henrique Penachin",
+			"Vanderlei Aparecido Tome (caninana)",
+			"Rodolfo Abrahao",
+			"Rodrigo Carmo",
+			"Guilherme Jorge De Mendonca",
+			"Felipe Fernandes",
+			"",
+			"",
+			"",
+			"",
+			"",
+			"Kleber Neves",
+		],
+	},
 };
 
-function getPointsByPosition(pos, tournamentName) {
+function getPointsByPosition(pos, tournamentName, stageName = "") {
 	const tournamentKey = String(tournamentName || '').toLowerCase();
 
 	if (tournamentKey === "last chance" || tournamentKey === "freeroll" || tournamentKey.startsWith("super 50")) {
@@ -371,6 +459,10 @@ function getPointsByPosition(pos, tournamentName) {
 	}
 
 	if (tournamentName === "High Roller") {
+		// Etapa 3: chop entre 1º e 2º lugar, ambos receberam 120 pts
+		if (stageName === "Etapa 3") {
+			return SCORE_HIGH_ROLLER_CHOP_BY_POSITION[pos] || 0;
+		}
 		return SCORE_HIGH_ROLLER_BY_POSITION[pos] || 0;
 	}
 
@@ -415,7 +507,7 @@ function buildRanking() {
 				seenInTournament.add(playerKey);
 
 				const pos = index + 1;
-				const points = getPointsByPosition(pos, tournamentName);
+				const points = getPointsByPosition(pos, tournamentName, stageName);
 
 				if (!players.has(playerKey)) {
 					players.set(playerKey, {
