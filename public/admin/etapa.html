@@ -34,7 +34,7 @@
       <button class="btn btn-green" id="btnFinal" onclick="openFinalModal()" style="display:none">Criar Mesa Final</button>
       <button class="btn" id="btnFinish" onclick="finishEtapa()" style="display:none">Encerrar Etapa</button>
       <button class="btn" id="btnPrint" onclick="printPositions()" style="display:none">Imprimir Posicoes</button>
-      <button class="btn btn-primary" id="btnPdf" onclick="downloadPdf()" style="display:none">Baixar PDF</button>
+      <button class="btn btn-primary" id="btnPdf" onclick="openReport()" style="display:none">Ver Relatório</button>
     </div>
   </div>
 
@@ -246,8 +246,8 @@
       loadAll();
     }
 
-    function downloadPdf() {
-      window.open(`/api/admin/etapas/${etapaId}/pdf`, '_blank');
+    function openReport() {
+      window.open(`/api/public/etapas/${etapaId}/report`, '_blank');
     }
 
     function printPositions() {
