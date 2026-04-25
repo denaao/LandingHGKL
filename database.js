@@ -206,4 +206,49 @@ db.exec(`
   })();
 }
 
+// ── MIGRATION 3: Normalizar nomes de global_teams + adicionar equipes faltantes ──
+{
+  // Renomear variantes para nomes canônicos (só altera o nome, preserva id e todos os dados vinculados)
+  const renames = [
+    ['Barão Poker',         'Poker Barão'],
+    ['Bussines Poker',      'Business Poker'],
+    ['Esporte da mente 01', 'Esporte da Mente Zero 1'],
+    ['Fenix Poker',         'Fênix'],
+    ['Leva o restinho',     'Leva o Restinho Team'],
+  ];
+
+  // Todos os 15 times que devem existir em global_teams
+  const allCanonical = [
+    'Garagentos', 'Pesadelo', 'Marcão 42 Poker Team', 'Esporte da Mente Zero 1',
+    'Call por Blefe', 'Leva o Restinho Team', 'Business Poker', 'Arena Poker',
+    'Poker Barão', 'Fênix', 'Suprema', 'Crazy Nuts', 'Paga o Careca',
+    'De Tudo um Poker', 'Ghost Poker',
+  ];
+
+  try {
+    db.transaction(() => {
+      for (const [variant, canonical] of renames) {
+        const variantRow = db.prepare('SELECT id FROM global_teams WHERE nome = ?').get(variant);
+        if (!variantRow) continue;
+        const canonicalRow = db.prepare('SELECT id FROM global_teams WHERE nome = ?').get(canonical);
+        if (canonicalRow) {
+          // Canônico já existe: mover etapa_teams do variante para o canônico
+          db.prepare('UPDATE OR IGNORE etapa_teams SET global_team_id = ? WHERE global_team_id = ?').run(canonicalRow.id, variantRow.id);
+          db.prepare('DELETE FROM etapa_teams WHERE global_team_id = ?').run(variantRow.id);
+          db.prepare('DELETE FROM global_teams WHERE id = ?').run(variantRow.id);
+        } else {
+          // Renomear direto (id preservado, FK intacta)
+          db.prepare('UPDATE global_teams SET nome = ? WHERE id = ?').run(canonical, variantRow.id);
+        }
+      }
+      // Inserir equipes que ainda não existem
+      const ins = db.prepare('INSERT OR IGNORE INTO global_teams (nome) VALUES (?)');
+      for (const nome of allCanonical) ins.run(nome);
+    })();
+    console.log('[DB] Migration 3: global_teams normalizados e completos');
+  } catch (e) {
+    console.error('[DB] Migration 3 erro:', e.message);
+  }
+}
+
 export default db;
