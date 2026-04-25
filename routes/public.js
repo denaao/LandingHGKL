@@ -339,7 +339,7 @@ router.get('/public/etapas/:id/report', (req, res) => {
       SELECT s.*, p.nome as player_nome, t.nome as team_nome,
              ((SELECT COUNT(*) FROM seats WHERE table_id = s.table_id) + 1 - s.elimination_order) as position
       FROM seats s JOIN players p ON s.player_id = p.id JOIN teams t ON p.team_id = t.id
-      WHERE s.table_id = ? ORDER BY CASE WHEN s.elimination_order IS NULL THEN 0 ELSE 1 END, s.elimination_order
+      WHERE s.table_id = ? ORDER BY CASE WHEN s.elimination_order IS NULL THEN 0 ELSE 1 END, s.elimination_order DESC
     `).all(table.id);
   }
 
