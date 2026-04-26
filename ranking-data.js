@@ -136,6 +136,44 @@ const SCORE_AMARELA_BY_POSITION = {
 	34: 10,
 };
 
+// Pontuação Main Event com chop de 1º/2º/3º/4º lugar (todos recebem 110 pts)
+const SCORE_MAIN_EVENT_CHOP_BY_POSITION = {
+	1: 110,
+	2: 110,
+	3: 110,
+	4: 110,
+	5: 100,
+	6: 90,
+	7: 80,
+	8: 70,
+	9: 60,
+	10: 40,
+	11: 40,
+	12: 40,
+	13: 40,
+	14: 40,
+	15: 40,
+	16: 40,
+	17: 40,
+	18: 40,
+	19: 34,
+	20: 34,
+	21: 34,
+	22: 34,
+	23: 34,
+	24: 34,
+	25: 34,
+	26: 34,
+	27: 34,
+	28: 30,
+	29: 30,
+	30: 30,
+	31: 30,
+	32: 30,
+	33: 30,
+	34: 30,
+};
+
 // Pontuação High Roller com chop de 1º/2º lugar (ambos recebem 120 pts)
 const SCORE_HIGH_ROLLER_CHOP_BY_POSITION = {
 	1: 120,
@@ -168,11 +206,21 @@ const PLAYER_ALIASES = new Map([
 	["eduardoyoshi", "eduardonogueira"],
 	["wielis", "wlelis"],
 	["lucianotakahashi", "lucianotaka"],
+	["viniciusromaninin", "viniciusromanini"],
+	["emersontesuosato", "emersonsato"],
+	["etienefelisatti", "etiene"],
+	["vladmirluisdelima", "vladimirluisrondellicardosodelima"],
+	["vanderleitome", "vanderleiaparecidotome"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
 	["eduardonogueira", "Eduardo Nogueira"],
 	["lucianotaka", "Luciano Takahashi"],
+	["viniciusromanini", "Vinicius Romanini"],
+	["emersonsato", "Emerson Sato"],
+	["etiene", "Etiene Felisatti"],
+	["vladimirluisrondellicardosodelima", "Vladmir Luis de Lima"],
+	["vanderleiaparecidotome", "Vanderlei Tomé"],
 ]);
 
 const TOURNAMENTS_BY_STAGE = {
@@ -393,6 +441,42 @@ const TOURNAMENTS_BY_STAGE = {
 		],
 	},
 	"Etapa 3": {
+		"Main Event": [
+			"Guilherme Moreno",
+			"Erick Da Silva Costa",
+			"Luciana Wada",
+			"Antonio Paulo Ferreira",
+			"Emerson Sato",
+			"Wellyngton Ribeiro Da Rocha",
+			"Johnny Beefgood",
+			"Wellington Andrade Da Silva",
+			"Jocimar Daniel",
+			"Eduardo Nogueira",
+			"Leandro Magui",
+			"Giordano Casteleti",
+			"Lucas Molina",
+			"Vinicius Romaninin",
+			"Leandro Rosa Simao",
+			"Douglas Soler",
+			"Thiago Wady Gnatos",
+			"Rodrigo Clemente",
+			"Marcos William de Souza",
+			"Andre Luis Rustiguer",
+			"Mauricio Carvalho",
+			"Wlelis",
+			"Pedro Henrique Bertolini",
+			"Fabio Jose Rocha",
+			"Felipe Fernandes",
+			"Joao Rodrigo Nickel",
+			"Santiago",
+			"Antonio Jose Bassani",
+			"Michel Marcos Eloi",
+			"Etiene Felisatti",
+			"Bruno Gambaro Pereira",
+			"Vladmir Luis de Lima",
+			"Ademar Armando",
+			"Vanderlei Tome",
+		],
 		"High Roller": [
 			"Pedro Santos",
 			"Botinha Andrey",
@@ -467,6 +551,10 @@ function getPointsByPosition(pos, tournamentName, stageName = "") {
 	}
 
 	if (tournamentName === "Main Event") {
+		// Etapa 3: chop entre 1º/2º/3º/4º lugar, todos receberam 110 pts
+		if (stageName === "Etapa 3") {
+			return SCORE_MAIN_EVENT_CHOP_BY_POSITION[pos] || 0;
+		}
 		return SCORE_MAIN_EVENT_BY_POSITION[pos] || 0;
 	}
 
