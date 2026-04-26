@@ -22,7 +22,11 @@ function resolveDbPath() {
     resolvedPath = join(requestedPath, 'hgkl.db');
   }
 
-  fs.mkdirSync(dirname(resolvedPath), { recursive: true });
+  try {
+    fs.mkdirSync(dirname(resolvedPath), { recursive: true });
+  } catch (_) {
+    // sem permissão para criar o dir — openDatabase() tentará os fallbacks
+  }
   return resolvedPath;
 }
 
