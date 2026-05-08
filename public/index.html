@@ -945,78 +945,81 @@
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-inner" style="flex-direction:column;align-items:center;gap:2rem;justify-content:center;flex-wrap:nowrap;">
+  <div class="hero-inner" style="flex-direction:column;align-items:center;gap:0;justify-content:center;flex-wrap:nowrap;">
 
-    <!-- logo -->
-    <div style="text-align:center;">
-      <img src="1 - logo.png" alt="Home Game King Live" class="hero-logo" style="max-width:500px;width:100%;" />
+    <!-- main content row -->
+    <div style="flex:1;display:flex;flex-direction:row;align-items:center;gap:3rem;justify-content:center;flex-wrap:wrap;width:100%;">
+      
+      <!-- logo -->
+      <div style="flex:1 1 50%;text-align:center;">
+        <img src="1 - logo.png" alt="Home Game King Live" class="hero-logo" style="max-width:500px;width:100%;" />
+        <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/apoio-removebg-preview_ijeqie.png" alt="Apoio" style="width:420px;max-width:90%;margin-top:.5rem;opacity:.85;display:block;margin-left:auto;margin-right:auto;" />
+      </div>
+
+      <div class="galeria-divider" style="min-height:300px;align-self:stretch;"></div>
+
+      <!-- info + flyer -->
+      <div style="flex:1 1 40%;display:flex;flex-direction:column;align-items:center;gap:1rem;">
+        <div class="hero-tagline">
+          <div class="hero-tagline-main">Vem a&iacute; a 5&ordf; Etapa</div>
+          <div style="display:inline-block;margin-top:.5rem;padding:.3rem 1rem;background:rgba(245,200,0,.15);border:1px solid var(--yellow);border-radius:6px;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.12em;color:var(--yellow);text-transform:uppercase;">&#127882; Anivers&aacute;rio Vit&atilde;o &amp; Bruxo</div>
+          <div class="hero-tagline-sub">Esteja preparado!</div>
+        </div>
+
+        <!-- datas -->
+        <div class="hero-dates">
+          <div class="hero-date-pill">
+            <span class="hero-date-num">21</span>
+            <span class="hero-date-day">Quinta<br/>Mai</span>
+          </div>
+          <div class="hero-date-sep">/</div>
+          <div class="hero-date-pill">
+            <span class="hero-date-num">22</span>
+            <span class="hero-date-day">Sexta<br/>Mai</span>
+          </div>
+        </div>
+
+        <!-- local -->
+        <div class="hero-local">
+          <div class="hero-local-venue">Espa&ccedil;o UNIK &mdash; Clube Cultura Art&iacute;stica de Campinas</div>
+          <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
+        </div>
+
+        <!-- countdown -->
+        <div class="countdown">
+          <div class="cd-block">
+            <span class="cd-num" id="cd-days">00</span>
+            <div class="cd-label">Dias</div>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-hours">00</span>
+            <div class="cd-label">Horas</div>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-mins">00</span>
+            <div class="cd-label">Min</div>
+          </div>
+          <div class="cd-sep">:</div>
+          <div class="cd-block">
+            <span class="cd-num" id="cd-secs">00</span>
+            <div class="cd-label">Seg</div>
+          </div>
+        </div>
+
+        <!-- flyer -->
+        <div style="text-align:center;width:100%;margin-top:1rem;">
+          <img src="../flyer.jpeg" alt="Flyer do Evento" style="max-width:450px;width:100%;border-radius:8px;box-shadow:0 8px 30px rgba(245,200,0,.2);" />
+        </div>
+      </div>
+
     </div>
 
-    <!-- logos de apoio -->
-    <div style="text-align:center;">
-      <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/q_auto,f_auto/apoio-removebg-preview_ijeqie.png" alt="Apoio" style="width:420px;max-width:90%;opacity:.85;display:block;margin-left:auto;margin-right:auto;" />
-    </div>
-
-    <!-- info -->
-    <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
-      <div class="hero-tagline">
-        <div class="hero-tagline-main">Vem a&iacute; a 5&ordf; Etapa</div>
-        <div style="display:inline-block;margin-top:.5rem;padding:.3rem 1rem;background:rgba(245,200,0,.15);border:1px solid var(--yellow);border-radius:6px;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.12em;color:var(--yellow);text-transform:uppercase;">&#127882; Anivers&aacute;rio Vit&atilde;o &amp; Bruxo</div>
-        <div class="hero-tagline-sub">Esteja preparado!</div>
-      </div>
-
-      <!-- datas -->
-      <div class="hero-dates">
-        <div class="hero-date-pill">
-          <span class="hero-date-num">21</span>
-          <span class="hero-date-day">Quinta<br/>Mai</span>
-        </div>
-        <div class="hero-date-sep">/</div>
-        <div class="hero-date-pill">
-          <span class="hero-date-num">22</span>
-          <span class="hero-date-day">Sexta<br/>Mai</span>
-        </div>
-      </div>
-
-      <!-- local -->
-      <div class="hero-local">
-        <div class="hero-local-venue">Espa&ccedil;o UNIK &mdash; Clube Cultura Art&iacute;stica de Campinas</div>
-        <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
-      </div>
-
-      <!-- countdown -->
-      <div class="countdown">
-        <div class="cd-block">
-          <span class="cd-num" id="cd-days">00</span>
-          <div class="cd-label">Dias</div>
-        </div>
-        <div class="cd-sep">:</div>
-        <div class="cd-block">
-          <span class="cd-num" id="cd-hours">00</span>
-          <div class="cd-label">Horas</div>
-        </div>
-        <div class="cd-sep">:</div>
-        <div class="cd-block">
-          <span class="cd-num" id="cd-mins">00</span>
-          <div class="cd-label">Min</div>
-        </div>
-        <div class="cd-sep">:</div>
-        <div class="cd-block">
-          <span class="cd-num" id="cd-secs">00</span>
-          <div class="cd-label">Seg</div>
-        </div>
-      </div>
-
-      <!-- flyer -->
-      <div style="margin-top:1rem;text-align:center;width:100%;">
-        <img src="../flyer.jpeg" alt="Flyer do Evento" style="max-width:600px;width:100%;border-radius:8px;box-shadow:0 8px 30px rgba(245,200,0,.2);" />
-      </div>
-
-      <!-- botões -->
-      <div class="hero-buttons">
-        <a href="#contact" class="btn-primary">Garantir Vaga</a>
-        <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
-      </div>
+    <!-- botões -->
+    <div class="hero-buttons" style="margin-top:2rem;">
+      <a href="#contact" class="btn-primary">Garantir Vaga</a>
+      <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
     </div>
 
   </div>
