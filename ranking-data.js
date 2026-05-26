@@ -136,11 +136,87 @@ const SCORE_AMARELA_BY_POSITION = {
 	34: 10,
 };
 
+// Etapa 4 Main Event: chop 3-way (1º/2º/3º recebem 130 pts) + estrutura Main Event chop
+const SCORE_MAIN_EVENT_E4_BY_POSITION = {
+	1: 130,
+	2: 130,
+	3: 130,
+	4: 110,
+	5: 100,
+	6: 90,
+	7: 80,
+	8: 70,
+	9: 60,
+	10: 40,
+	11: 40,
+	12: 40,
+	13: 40,
+	14: 40,
+	15: 40,
+	16: 40,
+	17: 40,
+	18: 40,
+	19: 34,
+	20: 34,
+	21: 34,
+	22: 34,
+	23: 34,
+	24: 34,
+	25: 34,
+	26: 34,
+	27: 34,
+	28: 30,
+	29: 30,
+	30: 30,
+	31: 30,
+	32: 30,
+	33: 30,
+	34: 30,
+};
+
 // Pontuação Main Event com chop de 1º/2º/3º/4º lugar (todos recebem 110 pts)
 const SCORE_MAIN_EVENT_CHOP_BY_POSITION = {
 	1: 110,
 	2: 110,
 	3: 110,
+	4: 110,
+	5: 100,
+	6: 90,
+	7: 80,
+	8: 70,
+	9: 60,
+	10: 40,
+	11: 40,
+	12: 40,
+	13: 40,
+	14: 40,
+	15: 40,
+	16: 40,
+	17: 40,
+	18: 40,
+	19: 34,
+	20: 34,
+	21: 34,
+	22: 34,
+	23: 34,
+	24: 34,
+	25: 34,
+	26: 34,
+	27: 34,
+	28: 30,
+	29: 30,
+	30: 30,
+	31: 30,
+	32: 30,
+	33: 30,
+	34: 30,
+};
+
+// Etapa 4 High Roller: chop 3-way (1º/2º/3º recebem 130 pts) + estrutura Main Event chop
+const SCORE_HIGH_ROLLER_E4_BY_POSITION = {
+	1: 130,
+	2: 130,
+	3: 130,
 	4: 110,
 	5: 100,
 	6: 90,
@@ -211,6 +287,9 @@ const PLAYER_ALIASES = new Map([
 	["etienefelisatti", "etiene"],
 	["vladmirluisdelima", "vladimirluisrondellicardosodelima"],
 	["vanderleitome", "vanderleiaparecidotome"],
+	["arianerinaldi", "arianirinaldi"],
+	["matheusdelimadosi", "matheusdelimabosi"],
+	["marcoswiliandesouza", "marcoswilliamdesouza"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
@@ -533,6 +612,94 @@ const TOURNAMENTS_BY_STAGE = {
 			"Kleber Neves",
 		],
 	},
+	"Etapa 4": {
+		"High Roller": [
+			"Cahue Silva",
+			"Jaime Silva",
+			"Leonardo Tozzi",
+			"Pedro Santos",
+			"Douglas Soler",
+			"Leandro Magui",
+			"Eduardo Nogueira",
+			"Ale Parra",
+			"Henry Julian Samurai",
+			"Rosangela",
+			"Manoel",
+			"Wlelis",
+			"Vitor Torres",
+			"Diego Allan Da Silva",
+			"Fabricio Ferreira",
+			"Luzia Serafim",
+			"Andre Moura Tarifa",
+			"Andre Gama",
+			"Gustavo Misso",
+			"Luis Roberto Vieira",
+			"Rodrigo Clemente",
+			"Botinha Andrey",
+		],
+		"Freeroll": [
+			"Hugo Demonte",
+			"Lucca Favero",
+			"Andre Moura Tarifa",
+			"Antonio Paulo Ferreira",
+			"Leonardo Miglioranca",
+			"Dario Lintz",
+			"Matheus De Lima Dosi",
+			"Carlos Eduardo Vitachi",
+			"Luis Fernando Ferreira P",
+			"Rodolfo Luiz Andrezza",
+			"Jocimar Daniel",
+			"Fernando Yudi Seike",
+			"Bruno Nigro",
+			"Bruno Marques",
+			"Mauro Rodrigues (zoio)",
+			"Allan Filippe Nogueira",
+			"Rodrigo Clemente",
+			"Andre Gama",
+			"Wlelis",
+			"Gustavo Diniz",
+			"Eduardo Nogueira",
+			"Gabriel Freire",
+			"Marcos Wilian De Souza",
+			"Maristela Ap Da Silva",
+			"Diego Allan Da Silva",
+		],
+		"Main Event": [
+			"Carolina Da Fonseca Torelli",
+			"Luis Lazuri",
+			"Ariane Rinaldi",
+			"Joao Rodrigo Nickel",
+			"Rodrigo Clemente",
+			"Vitor Torres",
+			"Fernando Yudi Seike",
+			"Renato Favarin",
+			"Thiago Machado",
+			"Jose Antonio Navarrete",
+			"Renan Santos",
+			"Giordano Casteleti",
+			"Guilherme Moreno",
+			"Josafa Alves Da Silva",
+			"Michelle Mannon Door",
+			"Eduardo Lima",
+			"Ricardo Goncalvez Ferreira",
+			"Rayane Vitoria Ortiz",
+			"Leandro Magui",
+			"Junior Santos",
+			"Jose Paulo Guimaraes",
+			"Pedro Zanola",
+			"Marco Aurelio De Oliveira Preto",
+			"Jaime Silva",
+			"Eduardo Nogueira",
+			"Douglas Soler",
+			"Victor Kammer",
+			"Vinicius Lombarde Facas",
+			"Welton Borges Torelli",
+			"Rogerio Carnieri",
+			"Bruno Cesar Sampaio",
+			"Michel Marcos Eloi",
+			"Matheus Jesus Alves Gimenez",
+		],
+	},
 };
 
 function getPointsByPosition(pos, tournamentName, stageName = "") {
@@ -547,6 +714,10 @@ function getPointsByPosition(pos, tournamentName, stageName = "") {
 		if (stageName === "Etapa 3") {
 			return SCORE_HIGH_ROLLER_CHOP_BY_POSITION[pos] || 0;
 		}
+		// Etapa 4: chop 3-way (1º/2º/3º = 130) + estrutura Main Event chop
+		if (stageName === "Etapa 4") {
+			return SCORE_HIGH_ROLLER_E4_BY_POSITION[pos] || 0;
+		}
 		return SCORE_HIGH_ROLLER_BY_POSITION[pos] || 0;
 	}
 
@@ -554,6 +725,10 @@ function getPointsByPosition(pos, tournamentName, stageName = "") {
 		// Etapa 3: chop entre 1º/2º/3º/4º lugar, todos receberam 110 pts
 		if (stageName === "Etapa 3") {
 			return SCORE_MAIN_EVENT_CHOP_BY_POSITION[pos] || 0;
+		}
+		// Etapa 4: chop 3-way (1º/2º/3º = 130) + estrutura Main Event chop
+		if (stageName === "Etapa 4") {
+			return SCORE_MAIN_EVENT_E4_BY_POSITION[pos] || 0;
 		}
 		return SCORE_MAIN_EVENT_BY_POSITION[pos] || 0;
 	}
