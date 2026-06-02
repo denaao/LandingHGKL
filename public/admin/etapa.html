@@ -258,75 +258,152 @@
 
       if (tablesToPrint.length === 0) { alert('Nenhuma mesa sorteada.'); return; }
 
+      const etapaNome = etapaData ? etapaData.nome : 'Batalha de Home Games';
+      const logoUrl = `${getBaseUrl()}/1%20-%20logo.png`;
+
       let tickets = [];
       tablesToPrint.forEach(table => {
         const label = table.phase === 'final' ? 'Mesa Final' : `Mesa ${table.numero}`;
         table.seats.forEach((s, i) => {
-          tickets.push({ nome: s.player_nome, equipe: s.team_nome, mesa: label, posicao: i + 1 });
+          const qrText = `${etapaNome} | ${s.player_nome} | ${label} | Posicao ${i + 1}`;
+          tickets.push({ nome: s.player_nome, equipe: s.team_nome, team_id: s.team_id, mesa: label, posicao: i + 1, qrText });
         });
       });
 
+      // Ordenar por equipe: todos os 8 de cada equipe juntos
+      tickets.sort((a, b) => {
+        const eq = a.equipe.localeCompare(b.equipe, 'pt-BR');
+        if (eq !== 0) return eq;
+        return a.posicao - b.posicao;
+      });
+
+      const ticketsJson = JSON.stringify(tickets);
+
       const win = window.open('', '_blank');
-      win.document.write(`<!DOCTYPE html><html><head><title>Posicoes</title>
+      win.document.write(`<!DOCTYPE html><html><head><title>Posicoes - ${etapaNome}</title>
         <style>
-          @page { size: 45mm 60mm; margin: 0; }
+          @page { size: 80mm auto; margin: 0; }
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { font-family: Arial, sans-serif; }
+          body { font-family: Arial, sans-serif; width: 80mm; background: #fff; }
           .ticket {
-            width: 45mm; height: 60mm;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
+            width: 80mm;
+            padding: 10mm 5mm 16mm 5mm;
+          }
+          .cut-line {
+            width: 80mm;
+            display: flex;
+            align-items: center;
+            gap: 2mm;
+            padding: 5mm 3mm;
+          }
+          .cut-line span { font-size: 14pt; line-height: 1; flex-shrink: 0; }
+          .cut-line hr { flex: 1; border: none; border-top: 1.5px dashed #555; margin: 0; }
+          .ticket-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 3mm;
+            margin-bottom: 3mm;
+            border-bottom: 1.5px solid #000;
+          }
+          .ticket-logo {
+            height: 12mm;
+            max-width: 55mm;
+            object-fit: contain;
+            margin-bottom: 1.5mm;
+          }
+          .ticket-etapa {
+            font-size: 7pt;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             text-align: center;
-            page-break-after: always;
-            padding: 2mm;
           }
-          .ticket-top {
-            flex: 1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            width: 100%;
-            border-bottom: 1px dashed #000;
-            padding-bottom: 2mm;
+          .ticket-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3mm;
           }
+          .ticket-player-info { flex: 1; }
           .ticket-nome {
-            font-size: 11pt; font-weight: 700;
+            font-size: 14pt;
+            font-weight: 700;
             text-transform: uppercase;
             line-height: 1.2;
             word-break: break-word;
           }
           .ticket-equipe {
-            font-size: 7pt; color: #555;
-            margin-top: 1mm;
+            font-size: 11pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #333;
+            margin-top: 1.5mm;
           }
-          .ticket-bottom {
-            flex: 1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            width: 100%;
-            padding-top: 2mm;
+          .ticket-qr {
+            width: 20mm;
+            height: 20mm;
+            flex-shrink: 0;
+            margin-left: 4mm;
           }
-          .ticket-mesa {
-            font-size: 10pt; font-weight: 700;
+          .ticket-qr canvas, .ticket-qr img { width: 20mm !important; height: 20mm !important; }
+          .ticket-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-top: 3mm;
+            border-top: 1.5px solid #000;
           }
-          .ticket-posicao {
-            font-size: 9pt; margin-top: 1mm;
-          }
-        </style></head><body>`);
-      tickets.forEach(t => {
+          .ticket-mesa { font-size: 16pt; font-weight: 700; }
+          .ticket-posicao { font-size: 16pt; font-weight: 700; color: #111; }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+      </head><body>`);
+
+      tickets.forEach((t, idx) => {
+        if (idx > 0) {
+          win.document.write(`
+            <div class="cut-line"><span>&#9988;</span><hr /><span>&#9988;</span></div>
+          `);
+        }
         win.document.write(`
           <div class="ticket">
-            <div class="ticket-top">
-              <div class="ticket-nome">${t.nome}</div>
-              <div class="ticket-equipe">${t.equipe}</div>
+            <div class="ticket-header">
+              <img class="ticket-logo" src="${logoUrl}" onerror="this.style.display='none'" />
+              <div class="ticket-etapa">${etapaNome}</div>
             </div>
-            <div class="ticket-bottom">
+            <div class="ticket-body">
+              <div class="ticket-player-info">
+                <div class="ticket-nome">${t.nome}</div>
+                <div class="ticket-equipe">${t.equipe}</div>
+              </div>
+              <div class="ticket-qr" id="qr_${idx}"></div>
+            </div>
+            <div class="ticket-footer">
               <div class="ticket-mesa">${t.mesa}</div>
-              <div class="ticket-posicao">Posicao ${t.posicao}</div>
+              <div class="ticket-posicao">Posição ${t.posicao}</div>
             </div>
           </div>
         `);
       });
-      win.document.write('</body></html>');
+
+      win.document.write(`
+        <script>
+          var tickets = ${ticketsJson};
+          window.onload = function() {
+            tickets.forEach(function(t, idx) {
+              new QRCode(document.getElementById('qr_' + idx), {
+                text: t.qrText,
+                width: 76,
+                height: 76,
+                correctLevel: QRCode.CorrectLevel.L
+              });
+            });
+            setTimeout(function() { window.print(); }, 900);
+          };
+        <\/script>
+      </body></html>`);
       win.document.close();
-      win.print();
     }
 
     // ── TABLES ──
