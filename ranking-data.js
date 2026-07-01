@@ -290,6 +290,24 @@ const PLAYER_ALIASES = new Map([
 	["arianerinaldi", "arianirinaldi"],
 	["matheusdelimadosi", "matheusdelimabosi"],
 	["marcoswiliandesouza", "marcoswilliamdesouza"],
+	// Etapa 5: nomes mais completos que se referem a jogadores ja existentes
+	["douglasmartinssoler", "douglassoler"],
+	["rodrigocesarclemente", "rodrigoclemente"],
+	["wlelismauriciodasilva", "wlelis"],
+	["andregamatoledobarberio", "andregama"],
+	["vitorwilliamdasilvatorres", "vitortorres"],
+	["jaimefelicianobasiliosilva", "jaimesilva"],
+	["wellingtonandrade", "wellingtonandradedasilva"],
+	["luccaalvesfavero", "luccafavero"],
+	["zeinodeoliveiraavila", "zeinoavila"],
+	["lazarocesardesiqueira", "lazarocesarsiqueira"],
+	["matheuslopodasilva", "matheusloposilva"],
+	["pedropiresdecamargodossantos", "pedrosantos"],
+	["henryjulianrosa", "henryjuliansamurai"],
+	["joaoclaudiovialijunior", "joaoclaudiojr"],
+	["raianevitoriaortiz", "rayanevitoriaortiz"],
+	["robsoneveraldodeandrade", "robsonandrade"],
+	["linconlcarlosdossantos", "linconicarlosdossantos"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
@@ -300,6 +318,32 @@ const PLAYER_DISPLAY_NAMES = new Map([
 	["etiene", "Etiene Felisatti"],
 	["vladimirluisrondellicardosodelima", "Vladmir Luis de Lima"],
 	["vanderleiaparecidotome", "Vanderlei Tomé"],
+	// Etapa 5: nomes completos oficiais (Caixa Titulo, conectores de/da/dos em minusculo)
+	["cahuesilva", "Cahuê Silva"],
+	["douglassoler", "Douglas Martins Soler"],
+	["jaimesilva", "Jaime Feliciano Basilio Silva"],
+	["leonardodesouzamariano", "Leonardo de Souza Mariano"],
+	["pedrosantos", "Pedro Pires de Camargo dos Santos"],
+	["henryjuliansamurai", "Henry Julian Rosa"],
+	["vitortorres", "Vitor William da Silva Torres"],
+	["rodrigoclemente", "Rodrigo César Clemente"],
+	["wlelis", "Wlelis Mauricio da Silva"],
+	["andregama", "André Gama Toledo Barberio"],
+	["antoniojosebassani", "Antônio José Bassani"],
+	["andrevictorgoncalvesdesouza", "André Victor Gonçalves de Souza"],
+	["luccafavero", "Lucca Alves Favero"],
+	["diegoallandasilva", "Diego Allan da Silva"],
+	["fernandoyudiseike", "Fernando Yudi Seike"],
+	["leonardorosasimao", "Leonardo Rosa Simao"],
+	["andremouratarifa", "André Moura Tarifa"],
+	["joaoclaudiojr", "João Claudio Viali Junior"],
+	["zeinoavila", "Zeino de Oliveira Avila"],
+	["carolinadafonsecatorelli", "Carolina da Fonseca Torelli"],
+	["lazarocesarsiqueira", "Lázaro César de Siqueira"],
+	["matheusloposilva", "Matheus Lopo da Silva"],
+	["fabianalopesdasilva", "Fabiana Lopes da Silva"],
+	["rayanevitoriaortiz", "Raiane Vitória Ortiz"],
+	["robsonandrade", "Robson Everaldo de Andrade"],
 ]);
 
 const TOURNAMENTS_BY_STAGE = {
@@ -700,6 +744,102 @@ const TOURNAMENTS_BY_STAGE = {
 			"Matheus Jesus Alves Gimenez",
 		],
 	},
+	"Etapa 5": {
+		"High Roller": [
+			"Cahuê Silva",
+			"Luan Pereira Coelho",
+			"André Gama Toledo Barberio",
+			"Leandro Henrique Cayres Colferai",
+			"Roberto Gomes Angeli",
+			"Douglas Martins Soler",
+			"Antônio José Bassani",
+			"Chacal",
+			"Leonardo Galiano",
+			"Jaime Feliciano Basilio Silva",
+			"Leonardo de Souza Mariano",
+			"Pedro Pires de Camargo dos Santos",
+			"Henry Julian Rosa",
+			"Bruno Ferreira da Silva",
+			"Vitor William da Silva Torres",
+			"Leonardo Elóes",
+			"Antenor Ademir Viganô",
+			"Andrey Pérez do lago",
+			"Rodrigo César clemente",
+			"Wlelis Mauricio da Silva",
+			"Joao Rodrigo Nickel",
+			"Eduardo nogueira",
+			"Taka",
+		],
+		"Main Event": [
+			"Gustavo Greco",
+			"Tiago Tadashi Tiyo",
+			"Leandro Aparecido lodo",
+			"André Victor Gonçalves de Souza",
+			"Wesley Roberto Gonçalves de Oliveira",
+			"Marcelo Dorta",
+			"TIAGO CASTELI",
+			"lucca alves favero",
+			"Rodrigo Degaspare",
+			"Diego Allan da Silva",
+			"RICARDO COSTA",
+			"Douglas Martins Soler",
+			"Arthur Perez de Lima",
+			"Welen Pereira Rodrigues",
+			"Robson Luiz Lodo",
+			"Wellington Andrade",
+			"Giordano Casteleti",
+			"Victor Hugo de Castro",
+			"Matheus de Lima Bosi",
+			"ANDRE CRIVELLARI PEREIRA",
+			"Mateus Campos Freire Gabriel",
+			"Leonardo souza bahrmann",
+			"Luis Rogério carnielli iaia",
+			"Lucas Nogueira Da Costa",
+			"Alan De Lima aoki",
+			"Leonardo Rosa simao",
+			"Fernando yudi seike",
+			"Jefferson",
+			"Leandro Ockner Francisco",
+			"Wellington de mattos",
+			"Ricardo Gonçalves",
+			"Pablo Lobo",
+			"Adelino José Fernandes Neto",
+			"Clizan Willian",
+			"Eduardo nogueira",
+			"Maury Forti",
+			"Nairton Menezes",
+			"Gustavo Felipe de Sousa",
+			"Sonia Barboza",
+			"André Moura Tarifa",
+			"André Gama Toledo Barberio",
+			"João Claudio viali Junior",
+			"Rebeca da Silva Cesar",
+			"Gabriel Freire",
+			"ANGELO JOSE DZIURKOWSKI",
+			"Carolina da Fonseca Torelli",
+			"Lázaro César de Siqueira",
+			"Rafael Prims Claviço",
+			"Luis Fernando Doria de Almeida Prado",
+			"Dayvison Freire Jaco",
+			"José Carlos Apolinário junior",
+			"MAYCON VINICIUS DOS SANTOS",
+			"Matheus lopo da silva",
+			"Michelle Dorta",
+			"Wlelis Mauricio da Silva",
+			"Joao Rodrigo Nickel",
+			"Linconl Carlos dos Santos",
+			"ZEINO DE OLIVEIRA AVILA",
+			"Jonathas Castelani",
+			"Rodrigo César clemente",
+			"Breno morais Teodoro da Silva",
+			"Paulo Cesar Kachan",
+			"VYCTOR HUGO INACIO DOS SANTOS",
+			"Wemily Lucena da Barbosa",
+			"Felipe YuasoFernandes",
+			"Kleber Neves",
+			"Iany Simy Dias",
+		],
+	},
 };
 
 function getPointsByPosition(pos, tournamentName, stageName = "") {
@@ -750,6 +890,20 @@ function normalizePlayerKey(name) {
 	return PLAYER_ALIASES.get(normalized) || normalized;
 }
 
+// Padroniza a exibicao em Caixa Titulo, mantendo conectores pt-BR em minusculo.
+function toTitleCase(name) {
+	const connectors = new Set(["de", "da", "das", "do", "dos", "e", "di"]);
+	return String(name || "")
+		.trim()
+		.split(/\s+/)
+		.map((word, index) => {
+			const lower = word.toLowerCase();
+			if (index > 0 && connectors.has(lower)) return lower;
+			return lower.charAt(0).toUpperCase() + lower.slice(1);
+		})
+		.join(" ");
+}
+
 function buildRanking() {
 	const players = new Map();
 
@@ -762,7 +916,7 @@ function buildRanking() {
 				if (!displayName) return;
 
 				const playerKey = normalizePlayerKey(displayName);
-				const canonicalDisplayName = PLAYER_DISPLAY_NAMES.get(playerKey) || displayName;
+				const canonicalDisplayName = toTitleCase(PLAYER_DISPLAY_NAMES.get(playerKey) || displayName);
 				if (!playerKey) return;
 
 				// Se o nome aparece duas vezes no mesmo torneio, mantemos a melhor colocacao (primeira ocorrencia).
@@ -799,6 +953,7 @@ function buildRanking() {
 	});
 
 	return Array.from(players.values())
+		.filter((p) => p.total > 0)
 		.map((p) => ({
 			nome: p.nome,
 			total: p.total,
