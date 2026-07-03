@@ -308,6 +308,7 @@ const PLAYER_ALIASES = new Map([
 	["raianevitoriaortiz", "rayanevitoriaortiz"],
 	["robsoneveraldodeandrade", "robsonandrade"],
 	["linconlcarlosdossantos", "linconicarlosdossantos"],
+	["leandrohenriquecayrescolferai", "leandromagui"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
@@ -344,6 +345,7 @@ const PLAYER_DISPLAY_NAMES = new Map([
 	["fabianalopesdasilva", "Fabiana Lopes da Silva"],
 	["rayanevitoriaortiz", "Raiane Vitória Ortiz"],
 	["robsonandrade", "Robson Everaldo de Andrade"],
+	["leandromagui", "Leandro Henrique Cayres Colferai"],
 ]);
 
 const TOURNAMENTS_BY_STAGE = {
