@@ -291,6 +291,47 @@
     .cd-label { font-size: .6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: .3rem; }
     .cd-sep { font-size: 2rem; color: rgba(245,200,0,.35); align-self: flex-start; margin-top: .5rem; }
 
+    /* oferecimento */
+    .hero-sponsor {
+      width: 100%;
+      margin-top: 2rem;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      gap: .6rem;
+      border-top: 1px solid rgba(245,200,0,.25);
+      border-bottom: 1px solid rgba(245,200,0,.25);
+      background: linear-gradient(90deg, transparent, rgba(245,200,0,.06), transparent);
+    }
+    .hero-sponsor-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .hero-sponsor-logo { height: 32px; width: auto; max-width: 100%; }
+    .hero-sponsor-cta {
+      margin-top: .25rem;
+      padding: .4rem 1.1rem;
+      border: 1px solid #EFA247;
+      border-radius: 6px;
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #EFA247;
+      text-decoration: none;
+      transition: background .2s, color .2s;
+    }
+    .hero-sponsor-cta:hover { background: #EFA247; color: #0a0a0a; }
+    @media (max-width: 600px) {
+      .hero-sponsor-logo { height: 24px; }
+    }
     .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
     .btn-primary {
@@ -1018,8 +1059,15 @@
 
     </div>
 
+    <!-- oferecimento -->
+    <div class="hero-sponsor">
+      <span class="hero-sponsor-label">Oferecimento</span>
+      <img src="stackplus.svg" alt="StackPlus" class="hero-sponsor-logo" />
+      <a href="https://www.stackplus.com.br/register" target="_blank" rel="noopener" class="hero-sponsor-cta">Criar conta agora</a>
+    </div>
+
     <!-- botões -->
-    <div class="hero-buttons" style="margin-top:2rem;">
+    <div class="hero-buttons" style="margin-top:1.5rem;">
       <a href="#contact" class="btn-primary">Garantir Vaga</a>
       <a href="#games" class="btn-outline">Ver Programa&ccedil;&atilde;o</a>
     </div>
