@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import db from '../database.js';
 import { canonicalTeamName } from '../services/team-names.js';
+import { createFeed } from '../services/stackplus-feed.js';
+import { etapasDoFeed, rankingGeralDoFeed, rankingEtapaDoFeed, mesasDoFeed } from '../services/batalha-map.js';
 
 const router = Router();
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dk3qmdebu';
@@ -248,12 +250,40 @@ router.post('/register/:token', (req, res) => {
 
 // ── PUBLIC RANKING ──
 
+// ── BATALHA: FONTE STACKPLUS ──
+// Com BATALHA_FONTE=stackplus, as rotas públicas da Batalha leem o feed do
+// StackPlus (onde as mesas são lançadas) e respondem no mesmo formato de antes.
+// Sem a env, seguem lendo o SQLite — é o caminho de volta.
+let feedDaBatalha = null;
+function fonteStackplus() {
+  return process.env.BATALHA_FONTE === 'stackplus';
+}
+function feed() {
+  if (!feedDaBatalha) {
+    feedDaBatalha = createFeed({
+      baseUrl: String(process.env.STACKPLUS_API_URL || '').replace(/\/$/, ''),
+      apiKey: process.env.STACKPLUS_EQUIPES_KEY || '',
+    });
+  }
+  return feedDaBatalha;
+}
+async function doStackplus(res, ler) {
+  try {
+    res.json(await ler());
+  } catch (e) {
+    console.error('[batalha] StackPlus indisponível:', e.message);
+    res.status(503).json({ error: 'Ranking indisponível no momento' });
+  }
+}
+
 router.get('/public/etapas', (req, res) => {
+  if (fonteStackplus()) return doStackplus(res, async () => etapasDoFeed(await feed().get('/public/equipes/temporada')));
   const etapas = db.prepare("SELECT id, nome, status FROM etapas ORDER BY id DESC").all();
   res.json(etapas);
 });
 
 router.get('/public/etapas/:id/ranking', (req, res) => {
+  if (fonteStackplus()) return doStackplus(res, async () => rankingEtapaDoFeed(await feed().get(`/public/equipes/etapas/${encodeURIComponent(req.params.id)}/classificacao`)));
   const etapaId = req.params.id;
   const teams = db.prepare(`
     SELECT et.id as team_id, gt.nome as team_nome
@@ -300,6 +330,7 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
 });
 
 router.get('/public/ranking-geral', (req, res) => {
+  if (fonteStackplus()) return doStackplus(res, async () => rankingGeralDoFeed(await feed().get('/public/equipes/temporada')));
   // Pontos históricos (antes do sistema de etapas)
   const teamTotals = {};
   for (const row of db.prepare('SELECT team_nome, points FROM team_base_points').all()) {
@@ -340,6 +371,7 @@ router.get('/public/ranking-geral', (req, res) => {
 });
 
 router.get('/public/etapas/:id/tables', (req, res) => {
+  if (fonteStackplus()) return doStackplus(res, async () => mesasDoFeed(await feed().get(`/public/equipes/etapas/${encodeURIComponent(req.params.id)}/mesas`)));
   const tables = db.prepare('SELECT * FROM tables_t WHERE etapa_id = ? ORDER BY phase, numero').all(req.params.id);
   for (const table of tables) {
     table.seats = db.prepare(`
