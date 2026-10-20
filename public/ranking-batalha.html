@@ -149,7 +149,7 @@
     function renderTabs() {
       let html = `<button class="etapa-tab" data-id="geral" onclick="selectGeral()">Geral</button>`;
       html += etapas.map(e =>
-        `<button class="etapa-tab" data-id="${e.id}" onclick="selectEtapa(${e.id})">${e.nome}</button>`
+        `<button class="etapa-tab" data-id="${e.id}" onclick="selectEtapa(this.dataset.id)">${e.nome}</button>`
       ).join('');
       document.getElementById('etapaTabs').innerHTML = html;
     }
@@ -161,7 +161,7 @@
       });
       if (autoRefresh) clearInterval(autoRefresh);
       loadGeralRanking();
-      autoRefresh = setInterval(loadGeralRanking, 15000);
+      autoRefresh = setInterval(loadGeralRanking, 10000);
     }
 
     async function loadGeralRanking() {
@@ -206,14 +206,14 @@
       });
       loadRanking();
       if (autoRefresh) clearInterval(autoRefresh);
-      autoRefresh = setInterval(loadRanking, 15000);
+      autoRefresh = setInterval(loadRanking, 10000);
     }
 
     async function loadRanking() {
       try {
         const [rankRes, tablesRes] = await Promise.all([
-          fetch(`/api/public/etapas/${currentEtapaId}/ranking`),
-          fetch(`/api/public/etapas/${currentEtapaId}/tables`)
+          fetch(`/api/public/etapas/${encodeURIComponent(currentEtapaId)}/ranking`),
+          fetch(`/api/public/etapas/${encodeURIComponent(currentEtapaId)}/tables`)
         ]);
         const ranking = await rankRes.json();
         const tables = await tablesRes.json();
