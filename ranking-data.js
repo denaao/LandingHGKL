@@ -310,6 +310,9 @@ const PLAYER_ALIASES = new Map([
 	["linconlcarlosdossantos", "linconicarlosdossantos"],
 	["leandrohenriquecayrescolferai", "leandromagui"],
 	["andreyperezdolago", "botinhaandrey"],
+	// StackPlus (6ª etapa em diante): lista de ligação revisada pelo dono
+	["adrianmoromoz", "adrianmoz"],
+	["fredgarlipp", "fredgarlip"],
 ]);
 
 const PLAYER_DISPLAY_NAMES = new Map([
@@ -929,4 +932,5 @@ function buildRanking() {
 		.sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome));
 }
 
+export { buildRanking, normalizePlayerKey, toTitleCase, PLAYER_DISPLAY_NAMES };
 export default buildRanking();
