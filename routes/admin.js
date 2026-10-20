@@ -4,6 +4,7 @@ import db from '../database.js';
 import { requireAuth } from '../middleware/auth.js';
 import { executeDraw } from '../services/draw.js';
 import { getQualifyingPoints, getFinalPoints, eliminationToPosition } from '../services/scoring.js';
+import { exportarEquipes } from '../services/export-equipes.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -336,6 +337,14 @@ router.get('/etapas/:id/ranking', (req, res) => {
 
   ranking.sort((a, b) => b.total_points - a.total_points);
   res.json(ranking);
+});
+
+// ── EXPORTAÇÃO PARA O STACKPLUS ──
+// Histórico da Batalha no formato que a importação do StackPlus lê.
+
+router.get('/export-equipes', (req, res) => {
+  res.setHeader('Content-Disposition', 'attachment; filename="batalha-hg-2026.json"');
+  res.json(exportarEquipes(db));
 });
 
 export default router;

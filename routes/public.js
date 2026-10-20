@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import db from '../database.js';
+import { canonicalTeamName } from '../services/team-names.js';
 
 const router = Router();
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dk3qmdebu';
@@ -297,19 +298,6 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
   ranking.sort((a, b) => b.total_points - a.total_points);
   res.json(ranking);
 });
-
-// Nomes variantes que devem ser tratados como o mesmo time
-const TEAM_NAME_ALIASES = {
-  'Esporte da mente 01':  'Esporte da Mente Zero 1',
-  'Leva o restinho':      'Leva o Restinho Team',
-  'Bussines Poker':       'Business Poker',
-  'Fenix Poker':          'Fênix',
-  'Barão Poker':          'Poker Barão',
-};
-
-function canonicalTeamName(nome) {
-  return TEAM_NAME_ALIASES[nome] || nome;
-}
 
 router.get('/public/ranking-geral', (req, res) => {
   // Pontos históricos (antes do sistema de etapas)
