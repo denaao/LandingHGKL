@@ -38,7 +38,12 @@ export function createFeed({ baseUrl, apiKey, ttlMs = 5000, backoffMs = 15000, e
 
   async function get(path) {
     const guardado = cache.get(path);
-    if (!guardado) return buscar(path);
+    if (!guardado) {
+      // Sem cache e com falha recente: responde na hora (quem chama cai no plano B)
+      // em vez de deixar cada visitante esperando o timeout de novo.
+      if (Date.now() - (falhouEm.get(path) ?? 0) < backoffMs) throw new Error(`StackPlus indisponível (aguardando ${backoffMs / 1000}s)`);
+      return buscar(path);
+    }
     const vencido = Date.now() - guardado.em >= ttlMs;
     const esperando = Date.now() - (falhouEm.get(path) ?? 0) < backoffMs;
     if (!vencido || esperando) return guardado.valor;

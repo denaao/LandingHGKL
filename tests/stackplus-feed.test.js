@@ -84,3 +84,11 @@ test('cache vencido espera a busca nova quando o StackPlus responde rápido', as
   assert.deepEqual(await feed.get('/x'), { v: 'velho' });
   assert.deepEqual(await feed.get('/x'), { v: 'novo' });
 });
+
+test('sem cache, depois de uma falha não tenta de novo antes do backoff', async () => {
+  const fetchImpl = fakeFetch([new Error('ECONNREFUSED'), { status: 200, body: { v: 1 } }]);
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', backoffMs: 60_000, fetchImpl, log: () => {} });
+  await assert.rejects(() => feed.get('/x'));
+  await assert.rejects(() => feed.get('/x'));
+  assert.equal(fetchImpl.chamadas.length, 1);
+});

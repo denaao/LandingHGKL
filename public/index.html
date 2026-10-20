@@ -1706,6 +1706,7 @@
       ultimoRankingJson = json;
       const aberto = tbody.querySelector('.player-details-row:not([style*="display:none"]):not([style*="display: none"])');
       const nomeAberto = aberto ? aberto.getAttribute('data-nome') : null;
+      const painelAberto = aberto ? [...aberto.querySelectorAll('.torneios-list')].findIndex((el) => el.style.display !== 'none') : -1;
 
       const rows = ranking.map((player, index) => {
         const safeId = `p-${index}-${String(player.nome || '').replace(/\W/g, '_')}`;
@@ -1734,6 +1735,11 @@
 
       tbody.innerHTML = rows;
       bindRankingInteractions();
+      if (nomeAberto && painelAberto >= 0) {
+        const linha = [...tbody.querySelectorAll('.player-details-row')].find((r) => r.getAttribute('data-nome') === nomeAberto);
+        const painel = linha && linha.querySelectorAll('.torneios-list')[painelAberto];
+        if (painel) painel.style.display = '';
+      }
     } catch (error) {
       console.error('Erro ao carregar ranking:', error);
       // Falha numa atualização mantém o ranking já mostrado.
