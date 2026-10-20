@@ -134,15 +134,35 @@
     async function loadEtapas() {
       try {
         const res = await fetch('/api/public/etapas');
+        if (!res.ok) throw new Error('Erro HTTP ' + res.status);
         etapas = await res.json();
         if (etapas.length === 0) {
           document.getElementById('content').innerHTML = '<p class="loading">Nenhuma etapa disponivel.</p>';
+          setTimeout(loadEtapas, 10000);
           return;
         }
         renderTabs();
         selectGeral();
       } catch (e) {
-        document.getElementById('content').innerHTML = '<p class="loading">Erro ao carregar dados.</p>';
+        document.getElementById('content').innerHTML = '<p class="loading">Erro ao carregar dados. Tentando de novo...</p>';
+        setTimeout(loadEtapas, 10000);
+      }
+    }
+
+    // Etapa nova criada com a página aberta ganha aba sem recarregar.
+    async function refreshTabs() {
+      try {
+        const res = await fetch('/api/public/etapas');
+        if (!res.ok) return;
+        const novas = await res.json();
+        if (JSON.stringify(novas) === JSON.stringify(etapas)) return;
+        etapas = novas;
+        renderTabs();
+        document.querySelectorAll('.etapa-tab').forEach(b => {
+          b.classList.toggle('active', b.dataset.id == currentEtapaId);
+        });
+      } catch (e) {
+        console.error(e);
       }
     }
 
@@ -165,6 +185,7 @@
     }
 
     async function loadGeralRanking() {
+      refreshTabs();
       try {
         const res = await fetch('/api/public/ranking-geral');
         const ranking = await res.json();

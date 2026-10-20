@@ -37,3 +37,43 @@ test('sem cache e com falha lança', async () => {
   const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', fetchImpl });
   await assert.rejects(() => feed.get('/x'));
 });
+
+test('chamadas simultâneas fazem um fetch só', async () => {
+  const resolvers = [];
+  const chamadas = [];
+  const fetchImpl = (url) => { chamadas.push(url); return new Promise((r) => { resolvers.push(() => r({ ok: true, status: 200, json: async () => ({ v: 1 }) })); }); };
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', fetchImpl });
+  const a = feed.get('/x'); const b = feed.get('/x'); const c = feed.get('/x');
+  await new Promise((r) => setImmediate(r));
+  resolvers.forEach((r) => r());
+  assert.deepEqual(await Promise.all([a, b, c]), [{ v: 1 }, { v: 1 }, { v: 1 }]);
+  assert.equal(chamadas.length, 1);
+});
+
+test('cache vencido volta na hora e atualiza em segundo plano', async () => {
+  let pendente = null;
+  const fetchImpl = fakeFetch([{ status: 200, body: { v: 'velho' } }]);
+  const lento = async () => { await new Promise((r) => { pendente = r; }); return { ok: true, status: 200, json: async () => ({ v: 'novo' }) }; };
+  let usarLento = false;
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', ttlMs: 0, fetchImpl: (...a) => (usarLento ? lento(...a) : fetchImpl(...a)) });
+  assert.deepEqual(await feed.get('/x'), { v: 'velho' });
+  usarLento = true;
+  const segunda = await Promise.race([feed.get('/x'), new Promise((r) => setTimeout(() => r('esperou o fetch'), 50))]);
+  assert.deepEqual(segunda, { v: 'velho' });
+  pendente?.();
+  await new Promise((r) => setTimeout(r, 10));
+  assert.deepEqual(await feed.get('/x'), { v: 'novo' });
+});
+
+test('falha servida do cache fica registrada no log e espera antes de tentar de novo', async () => {
+  const logs = [];
+  const fetchImpl = fakeFetch([{ status: 200, body: { v: 1 } }, { status: 429, body: {} }]);
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', ttlMs: 0, backoffMs: 60_000, fetchImpl, log: (m) => logs.push(m) });
+  await feed.get('/x');
+  await feed.get('/x');
+  await new Promise((r) => setTimeout(r, 10));
+  assert.match(logs.join('\n'), /429/);
+  await feed.get('/x');
+  await new Promise((r) => setTimeout(r, 10));
+  assert.equal(fetchImpl.chamadas.length, 2);
+});

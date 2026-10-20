@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { etapasDoFeed, rankingGeralDoFeed, rankingEtapaDoFeed, mesasDoFeed } from '../services/batalha-map.js';
+import { etapasDoFeed, rankingGeralDoFeed, rankingEtapaDoFeed, mesasDoFeed, etapaDaTemporada } from '../services/batalha-map.js';
 
 const temporada = {
   temporada: { eventId: 'ev1', nome: 'KING 2026' },
@@ -58,4 +58,20 @@ test('mesasDoFeed converte posição em ordem de eliminação', () => {
   assert.equal(out[0].seats.length, 8);
   assert.deepEqual(out[0].seats[0], { player_nome: 'Vivo 1', team_nome: 'A', elimination_order: null, points: 0 });
   assert.deepEqual(out[0].seats[7], { player_nome: 'Oitavo', team_nome: 'B', elimination_order: 1, points: 8 });
+});
+
+test('nomes vindos do StackPlus saem com HTML escapado', () => {
+  const t = { ...temporada, equipes: [{ colocacao: 1, nome: '<img src=x onerror=alert(1)>', total: 10, base: 10, etapas: [{ id: 't6', nome: 'Etapa "6"', pontos: 0 }] }] };
+  const [linha] = rankingGeralDoFeed(t);
+  assert.equal(linha.team_nome, '&lt;img src=x onerror=alert(1)&gt;');
+  assert.equal(linha.etapas[0].nome, 'Etapa &quot;6&quot;');
+  const mesas = mesasDoFeed({ mesas: [{ numero: 1, fase: 'QUALIFYING', jogadores: [{ jogador: "<b>O'Neil</b>", equipe: '<i>', eliminado: false, posicao: null, pontos: null }] }] });
+  assert.equal(mesas[0].seats[0].player_nome, '&lt;b&gt;O&#39;Neil&lt;/b&gt;');
+  assert.equal(mesas[0].seats[0].team_nome, '&lt;i&gt;');
+  assert.equal(etapasDoFeed({ etapas: [{ id: 'a"b', nome: '<x>', status: 'RUNNING' }] })[0].nome, '&lt;x&gt;');
+});
+
+test('etapaDaTemporada só aceita id que está na temporada', () => {
+  assert.equal(etapaDaTemporada(temporada, 't6'), true);
+  assert.equal(etapaDaTemporada(temporada, 'inventado'), false);
 });

@@ -1753,11 +1753,14 @@
         return `<tr${cls}><td><span class="rank-num">${i + 1}</span></td><td>${nameCls}</td><td ${ptsCls}>${team.total_points}</td></tr>`;
       }).join('');
     } catch (e) {
-      tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c;text-align:center">Erro ao carregar ranking.</td></tr>';
+      // Falha na atualização mantém o ranking já mostrado; o erro só aparece se não há nada.
+      if (!tbody.querySelector('.rank-num')) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c;text-align:center">Erro ao carregar ranking.</td></tr>';
+      }
     }
   }
   loadHgRanking();
-  setInterval(loadHgRanking, 15000);
+  setInterval(loadHgRanking, 10000);
 
   // ── GALERIA CLOUDINARY ──
   let currentGalleryTab = null;

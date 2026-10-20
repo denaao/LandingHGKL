@@ -2,7 +2,7 @@ import { Router } from 'express';
 import db from '../database.js';
 import { canonicalTeamName } from '../services/team-names.js';
 import { createFeed } from '../services/stackplus-feed.js';
-import { etapasDoFeed, rankingGeralDoFeed, rankingEtapaDoFeed, mesasDoFeed } from '../services/batalha-map.js';
+import { etapasDoFeed, rankingGeralDoFeed, rankingEtapaDoFeed, mesasDoFeed, etapaDaTemporada } from '../services/batalha-map.js';
 
 const router = Router();
 const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'dk3qmdebu';
@@ -267,23 +267,38 @@ function feed() {
   }
   return feedDaBatalha;
 }
-async function doStackplus(res, ler) {
+const TEMPORADA = '/public/equipes/temporada';
+async function doStackplus(res, path, converter) {
   try {
-    res.json(await ler());
+    const dados = await feed().get(path);
+    // Quantos segundos o dado tem — dá para ver de fora se o site parou de atualizar.
+    res.setHeader('X-Data-Age', String(feed().idade(path) ?? 0));
+    res.json(converter(dados));
   } catch (e) {
     console.error('[batalha] StackPlus indisponível:', e.message);
     res.status(503).json({ error: 'Ranking indisponível no momento' });
   }
 }
+// Só vai ao StackPlus por etapa que está na temporada: id inventado não gasta a cota do feed.
+async function daEtapa(req, res, sufixo, converter) {
+  try {
+    const temporada = await feed().get(TEMPORADA);
+    if (!etapaDaTemporada(temporada, req.params.id)) return res.status(404).json({ error: 'Etapa não encontrada' });
+  } catch (e) {
+    console.error('[batalha] StackPlus indisponível:', e.message);
+    return res.status(503).json({ error: 'Ranking indisponível no momento' });
+  }
+  return doStackplus(res, `/public/equipes/etapas/${encodeURIComponent(req.params.id)}/${sufixo}`, converter);
+}
 
 router.get('/public/etapas', (req, res) => {
-  if (fonteStackplus()) return doStackplus(res, async () => etapasDoFeed(await feed().get('/public/equipes/temporada')));
+  if (fonteStackplus()) return doStackplus(res, TEMPORADA, etapasDoFeed);
   const etapas = db.prepare("SELECT id, nome, status FROM etapas ORDER BY id DESC").all();
   res.json(etapas);
 });
 
 router.get('/public/etapas/:id/ranking', (req, res) => {
-  if (fonteStackplus()) return doStackplus(res, async () => rankingEtapaDoFeed(await feed().get(`/public/equipes/etapas/${encodeURIComponent(req.params.id)}/classificacao`)));
+  if (fonteStackplus()) return daEtapa(req, res, 'classificacao', rankingEtapaDoFeed);
   const etapaId = req.params.id;
   const teams = db.prepare(`
     SELECT et.id as team_id, gt.nome as team_nome
@@ -330,7 +345,7 @@ router.get('/public/etapas/:id/ranking', (req, res) => {
 });
 
 router.get('/public/ranking-geral', (req, res) => {
-  if (fonteStackplus()) return doStackplus(res, async () => rankingGeralDoFeed(await feed().get('/public/equipes/temporada')));
+  if (fonteStackplus()) return doStackplus(res, TEMPORADA, rankingGeralDoFeed);
   // Pontos históricos (antes do sistema de etapas)
   const teamTotals = {};
   for (const row of db.prepare('SELECT team_nome, points FROM team_base_points').all()) {
@@ -371,7 +386,7 @@ router.get('/public/ranking-geral', (req, res) => {
 });
 
 router.get('/public/etapas/:id/tables', (req, res) => {
-  if (fonteStackplus()) return doStackplus(res, async () => mesasDoFeed(await feed().get(`/public/equipes/etapas/${encodeURIComponent(req.params.id)}/mesas`)));
+  if (fonteStackplus()) return daEtapa(req, res, 'mesas', mesasDoFeed);
   const tables = db.prepare('SELECT * FROM tables_t WHERE etapa_id = ? ORDER BY phase, numero').all(req.params.id);
   for (const table of tables) {
     table.seats = db.prepare(`
