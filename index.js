@@ -3,6 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
 import ranking from './ranking-data.js';
+import { createFeed } from './services/stackplus-feed.js';
+import { respostaRanking, respostaPremio } from './services/ranking-rotas.js';
+import { premioDoRanking, TEMPORADA_HISTORICO } from './services/ranking-ao-vivo.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import publicRoutes from './routes/public.js';
@@ -61,8 +64,28 @@ app.get('/favicon.ico', (req, res) => {
 
 app.use(express.static('public'));
 
-app.get('/ranking', (req, res) => {
-  res.json(ranking);
+// Ranking de Jogadores: com RANKING_FONTE=stackplus, histórico + StackPlus ao vivo.
+// Sem a env, o histórico como sempre foi (caminho de volta).
+let feedDoRanking = null;
+function rankingAoVivo() {
+  if (process.env.RANKING_FONTE !== 'stackplus') return null;
+  if (!feedDoRanking) {
+    feedDoRanking = createFeed({
+      baseUrl: String(process.env.STACKPLUS_API_URL || '').replace(/\/$/, ''),
+      apiKey: process.env.STACKPLUS_EQUIPES_KEY || '',
+    });
+  }
+  return feedDoRanking;
+}
+
+app.get('/ranking', async (req, res) => {
+  const feed = rankingAoVivo();
+  res.json(feed ? await respostaRanking(feed, ranking) : ranking);
+});
+
+app.get('/api/public/premio-ranking', async (req, res) => {
+  const feed = rankingAoVivo();
+  res.json(feed ? await respostaPremio(feed) : premioDoRanking({ temporada: { eventId: TEMPORADA_HISTORICO } }));
 });
 
 app.get('/health', (req, res) => {

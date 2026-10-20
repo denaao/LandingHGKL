@@ -1242,14 +1242,14 @@
       <img src="https://res.cloudinary.com/dk3qmdebu/image/upload/c_fill,w_200,h_200,q_auto,f_auto/ranking_khfrwd.jpg" alt="Ranking" />
       <div class="fotografo-info" style="text-align:center;">
         <div class="fotografo-label">Arrecadado Ranking</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1;">R$ 23.641,00</div>
+        <div id="premio-total" style="font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1;">R$ 23.641,00</div>
         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">em disputa &middot; premia os 5 primeiros</div>
         <div style="display:grid;grid-template-columns:auto auto auto;gap:.2rem .7rem;margin-top:.7rem;font-size:.8rem;text-align:left;">
-          <span style="color:var(--yellow);font-weight:700;">1&ordm;</span><span>35%</span><span style="color:var(--text-muted);">R$ 8.274,35</span>
-          <span style="color:var(--yellow);font-weight:700;">2&ordm;</span><span>25%</span><span style="color:var(--text-muted);">R$ 5.910,25</span>
-          <span style="color:var(--yellow);font-weight:700;">3&ordm;</span><span>18%</span><span style="color:var(--text-muted);">R$ 4.255,38</span>
-          <span style="color:var(--yellow);font-weight:700;">4&ordm;</span><span>12%</span><span style="color:var(--text-muted);">R$ 2.836,92</span>
-          <span style="color:var(--yellow);font-weight:700;">5&ordm;</span><span>10%</span><span style="color:var(--text-muted);">R$ 2.364,10</span>
+          <span style="color:var(--yellow);font-weight:700;">1&ordm;</span><span>35%</span><span id="premio-1" style="color:var(--text-muted);">R$ 8.274,35</span>
+          <span style="color:var(--yellow);font-weight:700;">2&ordm;</span><span>25%</span><span id="premio-2" style="color:var(--text-muted);">R$ 5.910,25</span>
+          <span style="color:var(--yellow);font-weight:700;">3&ordm;</span><span>18%</span><span id="premio-3" style="color:var(--text-muted);">R$ 4.255,38</span>
+          <span style="color:var(--yellow);font-weight:700;">4&ordm;</span><span>12%</span><span id="premio-4" style="color:var(--text-muted);">R$ 2.836,92</span>
+          <span style="color:var(--yellow);font-weight:700;">5&ordm;</span><span>10%</span><span id="premio-5" style="color:var(--text-muted);">R$ 2.364,10</span>
         </div>
       </div>
     </div>
@@ -1693,14 +1693,19 @@
     const tbody = rankingSection.querySelector('tbody');
     if (!tbody) return;
 
-    tbody.innerHTML = '<tr><td colspan="3" style="color:#888">Carregando ranking real...</td></tr>';
-
     try {
       const response = await fetch(`${API_BASE}/ranking`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
       const ranking = await response.json();
       if (!Array.isArray(ranking)) throw new Error('Formato inválido da API');
+
+      // Atualiza a cada 10s: só redesenha se mudou, e reabre o jogador que estava aberto.
+      const json = JSON.stringify(ranking);
+      if (json === ultimoRankingJson) return;
+      ultimoRankingJson = json;
+      const aberto = tbody.querySelector('.player-details-row:not([style*="display:none"]):not([style*="display: none"])');
+      const nomeAberto = aberto ? aberto.getAttribute('data-nome') : null;
 
       const rows = ranking.map((player, index) => {
         const safeId = `p-${index}-${String(player.nome || '').replace(/\W/g, '_')}`;
@@ -1716,7 +1721,7 @@
         `;
 
         const detailsRow = `
-          <tr class="player-details-row" data-player-id="${safeId}" style="display:none;">
+          <tr class="player-details-row" data-player-id="${safeId}" data-nome="${escapeHtml(player.nome)}" style="${player.nome === nomeAberto ? '' : 'display:none;'}">
             <td></td>
             <td colspan="2" style="background:rgba(245,200,0,0.07);padding:1rem 2rem;">
               ${createDetailsHtml(player)}
@@ -1731,11 +1736,35 @@
       bindRankingInteractions();
     } catch (error) {
       console.error('Erro ao carregar ranking:', error);
-      tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c">Erro ao carregar ranking real.</td></tr>';
+      // Falha numa atualização mantém o ranking já mostrado.
+      if (!tbody.querySelector('.rank-num')) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:#e74c3c">Erro ao carregar ranking real.</td></tr>';
+      }
     }
   }
 
+  let ultimoRankingJson = null;
   loadRankingFromApi();
+  setInterval(loadRankingFromApi, 10000);
+
+  // Arrecadado do ranking e prêmios dos 5 primeiros (o HTML acima é o valor inicial).
+  const brl = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  async function loadPremioRanking() {
+    try {
+      const res = await fetch(`${API_BASE}/api/public/premio-ranking`);
+      if (!res.ok) return;
+      const premio = await res.json();
+      document.getElementById('premio-total').textContent = brl(premio.total);
+      for (const p of premio.premios) {
+        const el = document.getElementById(`premio-${p.posicao}`);
+        if (el) el.textContent = brl(p.valor);
+      }
+    } catch (e) {
+      console.error('Erro ao carregar prêmio do ranking:', e);
+    }
+  }
+  loadPremioRanking();
+  setInterval(loadPremioRanking, 10000);
 
   // ── RANKING BATALHA DE HOME GAMES ──
   async function loadHgRanking() {
