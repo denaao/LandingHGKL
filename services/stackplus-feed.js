@@ -2,10 +2,11 @@
 //
 // O site não pode congelar nem derrubar o StackPlus em dia de etapa:
 // - uma busca por caminho de cada vez, por mais visitantes que cheguem juntos;
-// - dado vencido volta na hora e a atualização corre em segundo plano;
+// - dado vencido: espera a busca nova por até `esperaMs`; se o StackPlus demorar,
+//   devolve o antigo e a atualização segue em segundo plano;
 // - depois de uma falha, espera `backoffMs` antes de tentar de novo;
 // - toda falha vai para o log, mesmo quando o cache cobre.
-export function createFeed({ baseUrl, apiKey, ttlMs = 5000, backoffMs = 15000, fetchImpl = fetch, log = console.error }) {
+export function createFeed({ baseUrl, apiKey, ttlMs = 5000, backoffMs = 15000, esperaMs = 1500, fetchImpl = fetch, log = console.error }) {
   const cache = new Map(); // path -> { valor, em }
   const emVoo = new Map(); // path -> Promise
   const falhouEm = new Map(); // path -> timestamp
@@ -40,8 +41,10 @@ export function createFeed({ baseUrl, apiKey, ttlMs = 5000, backoffMs = 15000, f
     if (!guardado) return buscar(path);
     const vencido = Date.now() - guardado.em >= ttlMs;
     const esperando = Date.now() - (falhouEm.get(path) ?? 0) < backoffMs;
-    if (vencido && !esperando) buscar(path).catch(() => {});
-    return guardado.valor;
+    if (!vencido || esperando) return guardado.valor;
+    const novo = buscar(path).catch(() => guardado.valor);
+    const antigo = new Promise((r) => setTimeout(() => r(guardado.valor), esperaMs).unref?.());
+    return Promise.race([novo, antigo]);
   }
 
   // Idade do dado em cache, em segundos (null = nunca leu).

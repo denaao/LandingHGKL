@@ -55,7 +55,7 @@ test('cache vencido volta na hora e atualiza em segundo plano', async () => {
   const fetchImpl = fakeFetch([{ status: 200, body: { v: 'velho' } }]);
   const lento = async () => { await new Promise((r) => { pendente = r; }); return { ok: true, status: 200, json: async () => ({ v: 'novo' }) }; };
   let usarLento = false;
-  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', ttlMs: 0, fetchImpl: (...a) => (usarLento ? lento(...a) : fetchImpl(...a)) });
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', ttlMs: 0, esperaMs: 10, fetchImpl: (...a) => (usarLento ? lento(...a) : fetchImpl(...a)) });
   assert.deepEqual(await feed.get('/x'), { v: 'velho' });
   usarLento = true;
   const segunda = await Promise.race([feed.get('/x'), new Promise((r) => setTimeout(() => r('esperou o fetch'), 50))]);
@@ -76,4 +76,11 @@ test('falha servida do cache fica registrada no log e espera antes de tentar de 
   await feed.get('/x');
   await new Promise((r) => setTimeout(r, 10));
   assert.equal(fetchImpl.chamadas.length, 2);
+});
+
+test('cache vencido espera a busca nova quando o StackPlus responde rápido', async () => {
+  const fetchImpl = fakeFetch([{ status: 200, body: { v: 'velho' } }, { status: 200, body: { v: 'novo' } }]);
+  const feed = createFeed({ baseUrl: 'https://sp.test/api', apiKey: 'k', ttlMs: 0, fetchImpl });
+  assert.deepEqual(await feed.get('/x'), { v: 'velho' });
+  assert.deepEqual(await feed.get('/x'), { v: 'novo' });
 });
