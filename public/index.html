@@ -1770,16 +1770,22 @@
     aniversariodenaao: 'niverdenaao'
   };
 
-  function compareGalleryTags(left, right) {
-    const leftNumeric = /^etapa(\d+)$/i.exec(left.tag);
-    const rightNumeric = /^etapa(\d+)$/i.exec(right.tag);
+  // Número da etapa nas tags "etapa6" e "6etapa" (o Cloudinary tem os dois formatos).
+  function etapaNumero(tag) {
+    const m = /^etapa(\d+)$/i.exec(tag) || /^(\d+)etapa$/i.exec(tag);
+    return m ? Number(m[1]) : null;
+  }
 
-    if (leftNumeric && rightNumeric) {
-      return Number(leftNumeric[1]) - Number(rightNumeric[1]);
+  function compareGalleryTags(left, right) {
+    const leftNumeric = etapaNumero(left.tag);
+    const rightNumeric = etapaNumero(right.tag);
+
+    if (leftNumeric !== null && rightNumeric !== null) {
+      return leftNumeric - rightNumeric;
     }
 
-    if (leftNumeric) return -1;
-    if (rightNumeric) return 1;
+    if (leftNumeric !== null) return -1;
+    if (rightNumeric !== null) return 1;
 
     return left.label.localeCompare(right.label, 'pt-BR', { sensitivity: 'base' });
   }
@@ -1813,8 +1819,8 @@
   }
 
   function formatEtapaLabel(tag) {
-    const numeric = /^etapa(\d+)$/i.exec(tag);
-    if (numeric) return `Etapa ${numeric[1]}`;
+    const numeric = etapaNumero(tag);
+    if (numeric !== null) return `Etapa ${numeric}`;
     return tag
       .replace(/[-_]+/g, ' ')
       .replace(/\s+/g, ' ')

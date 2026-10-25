@@ -196,16 +196,20 @@
     }
 
     function addEtapa() {
-      const label = prompt('Nome da etapa (ex: Etapa 3):');
+      let label = prompt('Nome da etapa (ex: Etapa 3):');
       if (!label || !label.trim()) return;
-      const tag = normalizeEtapaTag(label.trim());
+      label = label.trim();
+      // "6ª Etapa", "etapa 6", "6a etapa" viram sempre etapa6 / "Etapa 6".
+      const numero = /etapa/i.test(label) && /(\d+)/.exec(label);
+      if (numero) label = `Etapa ${Number(numero[1])}`;
+      const tag = numero ? `etapa${Number(numero[1])}` : normalizeEtapaTag(label);
       if (!tag) {
         alert('Nome da etapa invalido. Use letras e numeros.');
         return;
       }
       const etapas = getEtapas();
       if (etapas.some(e => e.tag === tag)) { alert('Etapa ja existe!'); return; }
-      etapas.push({ tag, label: label.trim() });
+      etapas.push({ tag, label });
       saveEtapas(etapas);
 
       currentEtapa = tag;
