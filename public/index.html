@@ -627,6 +627,25 @@
 
     .prize { font-weight: 700; color: var(--yellow); }
 
+    /* ranking encerrado: premiados em destaque, demais apagados */
+    .player-premio {
+      display: inline-block;
+      margin-left: .6rem;
+      padding: .1rem .55rem;
+      background: rgba(245,200,0,.15);
+      border: 1px solid var(--yellow);
+      border-radius: 5px;
+      font-family: 'Oswald', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      color: var(--yellow);
+      white-space: nowrap;
+    }
+    .rank-premiado .player-name { color: #fff; font-size: .95rem; }
+    .rank-off { opacity: .35; }
+    .rank-off:hover { opacity: .7; }
+
     .bar-wrap { display: flex; align-items: center; gap: .6rem; }
     .bar { flex: 1; height: 4px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; }
     .bar-fill { height: 100%; background: linear-gradient(90deg, var(--yellow), #fff9); border-radius: 2px; }
@@ -997,63 +1016,21 @@
         <div style="display:flex;justify-content:center;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:.5rem;">
           <img src="apoio.png" alt="Apoio" style="width:420px;max-width:90%;opacity:.85;display:block;" />
         </div>
-
-        <!-- local -->
-        <div class="hero-local" style="margin-top:2rem;">
-          <div class="hero-local-venue">Espa&ccedil;o UNIK<br />Clube Cultura Art&iacute;stica de Campinas</div>
-          <div class="hero-local-addr">Rod. Heitor Penteado, km 6 &mdash; Souzas, Campinas &mdash; SP</div>
-        </div>
-
-        <!-- datas -->
-        <div class="hero-dates" style="margin-top:1.25rem;margin-bottom:0;">
-          <div class="hero-date-pill">
-            <span class="hero-date-num">22</span>
-            <span class="hero-date-day">Quinta<br/>Out</span>
-          </div>
-          <div class="hero-date-sep">/</div>
-          <div class="hero-date-pill">
-            <span class="hero-date-num">23</span>
-            <span class="hero-date-day">Sexta<br/>Out</span>
-          </div>
-        </div>
-
-        <!-- countdown -->
-        <div class="countdown" style="margin-top:1.25rem;margin-bottom:0;">
-          <div class="cd-block">
-            <span class="cd-num" id="cd-days">00</span>
-            <div class="cd-label">Dias</div>
-          </div>
-          <div class="cd-sep">:</div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-hours">00</span>
-            <div class="cd-label">Horas</div>
-          </div>
-          <div class="cd-sep">:</div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-mins">00</span>
-            <div class="cd-label">Min</div>
-          </div>
-          <div class="cd-sep">:</div>
-          <div class="cd-block">
-            <span class="cd-num" id="cd-secs">00</span>
-            <div class="cd-label">Seg</div>
-          </div>
-        </div>
       </div>
 
       <div class="galeria-divider" style="min-height:300px;align-self:stretch;"></div>
 
       <!-- info + flyer -->
       <div style="flex:1 1 40%;display:flex;flex-direction:column;align-items:center;gap:1rem;">
-        <div class="hero-tagline">
-          <div class="hero-tagline-main">Vem a&iacute; a 6&ordf; Etapa</div>
-          <div style="display:inline-block;margin-top:.5rem;padding:.3rem 1rem;background:rgba(245,200,0,.15);border:1px solid var(--yellow);border-radius:6px;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.12em;color:var(--yellow);text-transform:uppercase;">&#127942; &Uacute;ltima Etapa</div>
-          <div class="hero-tagline-sub">Esteja preparado!</div>
-        </div>
-
-        <!-- flyer -->
-        <div style="text-align:center;width:100%;margin-top:1rem;">
-          <img src="flyer.jpeg" alt="Flyer do Evento" style="max-width:450px;width:100%;border-radius:8px;box-shadow:0 8px 30px rgba(245,200,0,.2);" />
+        <div class="hero-tagline" style="max-width:460px;">
+          <div class="hero-tagline-main">Obrigado por 2026!</div>
+          <div style="display:inline-block;margin-top:.5rem;padding:.3rem 1rem;background:rgba(245,200,0,.15);border:1px solid var(--yellow);border-radius:6px;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.12em;color:var(--yellow);text-transform:uppercase;">&#127942; Temporada encerrada</div>
+          <p style="margin-top:1.5rem;font-size:1rem;line-height:1.7;color:var(--text-muted);">
+            Foram 6 etapas, muitas m&atilde;os inesquec&iacute;veis e uma comunidade que fez do
+            Home Game King Live o que ele &eacute;. A cada jogador, parceiro e apoiador que
+            esteve com a gente nas mesas: <strong style="color:var(--yellow);">muito obrigado</strong>.
+          </p>
+          <div class="hero-tagline-sub" style="margin-top:1.25rem;">Nos vemos em 2027!</div>
         </div>
       </div>
 
@@ -1233,8 +1210,8 @@
     <div class="galeria-header-text">
       <h2 class="section-title">Ranking de <span>Jogadores</span></h2>
       <p class="section-desc">
-        Os maiores nomes confirmados para a 6&ordf; Etapa. Acompanhe a pontua&ccedil;&atilde;o
-        acumulada da temporada e o hist&oacute;rico de vit&oacute;rias.
+        Ranking da temporada 2026 encerrado. Parab&eacute;ns aos 5 premiados e a todos
+        que disputaram cada etapa com a gente.
       </p>
     </div>
     <div class="galeria-divider"></div>
@@ -1243,7 +1220,7 @@
       <div class="fotografo-info" style="text-align:center;">
         <div class="fotografo-label">Arrecadado Ranking</div>
         <div id="premio-total" style="font-family:'Oswald',sans-serif;font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1;">R$ 23.641,00</div>
-        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">em disputa &middot; premia os 5 primeiros</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">ranking encerrado &middot; premia&ccedil;&atilde;o dos 5 primeiros</div>
         <div style="display:grid;grid-template-columns:auto auto auto;gap:.2rem .7rem;margin-top:.7rem;font-size:.8rem;text-align:left;">
           <span style="color:var(--yellow);font-weight:700;">1&ordm;</span><span>35%</span><span id="premio-1" style="color:var(--text-muted);">R$ 8.274,35</span>
           <span style="color:var(--yellow);font-weight:700;">2&ordm;</span><span>25%</span><span id="premio-2" style="color:var(--text-muted);">R$ 5.910,25</span>
@@ -1276,7 +1253,7 @@
 <section id="batalha-hg">
   <div class="section-tag">Times</div>
   <h2 class="section-title">Batalha de <span>Home Games</span></h2>
-  <p class="section-desc">Ranking por equipes — a equipe com maior pontua&ccedil;&atilde;o ao final &eacute; a campe&atilde;.</p>
+  <p class="section-desc">Batalha de 2026 encerrada. Parab&eacute;ns &agrave; equipe campe&atilde; e a todas as equipes que disputaram a temporada.</p>
 
   <div class="ranking-wrapper">
     <table class="hg-table">
@@ -1545,28 +1522,6 @@
     document.getElementById('navLinks').classList.toggle('open');
   });
 
-  // countdown to 22 Oct 2026 10:00 BRT = UTC-3
-  const target = new Date('2026-10-22T13:00:00Z');
-
-  function pad(n) { return String(n).padStart(2, '0'); }
-
-  function tick() {
-    const diff = target - new Date();
-    if (diff <= 0) {
-      ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
-        document.getElementById(id).textContent = '00';
-      });
-      return;
-    }
-    document.getElementById('cd-days').textContent  = pad(Math.floor(diff / 86400000));
-    document.getElementById('cd-hours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
-    document.getElementById('cd-mins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
-    document.getElementById('cd-secs').textContent  = pad(Math.floor((diff % 60000) / 1000));
-  }
-
-  tick();
-  setInterval(tick, 1000);
-
   // nav opacity on scroll
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').style.background =
@@ -1712,11 +1667,14 @@
         const safeId = `p-${index}-${String(player.nome || '').replace(/\W/g, '_')}`;
         player.__safeId = safeId;
         const rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+        const premio = premiosRanking[index + 1];
+        const premioClass = index < 5 ? 'rank-premiado' : 'rank-off';
+        const premioHtml = index < 5 && premio != null ? `<span class="player-premio">${brl(premio)}</span>` : '';
 
         const mainRow = `
-          <tr class="${rankClass}">
+          <tr class="${rankClass} ${premioClass}">
             <td><span class="rank-num">${index + 1}</span></td>
-            <td><span class="player-name" data-player-id="${safeId}">${escapeHtml(player.nome)}</span></td>
+            <td><span class="player-name" data-player-id="${safeId}">${escapeHtml(player.nome)}</span>${premioHtml}</td>
             <td class="prize">${Number(player.total || 0)}</td>
           </tr>
         `;
@@ -1749,22 +1707,29 @@
     }
   }
 
+  // Arrecadado do ranking e prêmios dos 5 primeiros (o HTML acima é o valor inicial).
+  const brl = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const premiosRanking = {};
+
   let ultimoRankingJson = null;
   loadRankingFromApi();
   setInterval(loadRankingFromApi, 10000);
 
-  // Arrecadado do ranking e prêmios dos 5 primeiros (o HTML acima é o valor inicial).
-  const brl = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   async function loadPremioRanking() {
     try {
       const res = await fetch(`${API_BASE}/api/public/premio-ranking`);
       if (!res.ok) return;
       const premio = await res.json();
       document.getElementById('premio-total').textContent = brl(premio.total);
+      let mudou = false;
       for (const p of premio.premios) {
         const el = document.getElementById(`premio-${p.posicao}`);
         if (el) el.textContent = brl(p.valor);
+        if (premiosRanking[p.posicao] !== p.valor) mudou = true;
+        premiosRanking[p.posicao] = p.valor;
       }
+      // Prêmio aparece ao lado do nome: redesenha o ranking quando ele muda.
+      if (mudou) { ultimoRankingJson = null; loadRankingFromApi(); }
     } catch (e) {
       console.error('Erro ao carregar prêmio do ranking:', e);
     }
@@ -1780,12 +1745,12 @@
       const res = await fetch('/api/public/ranking-geral');
       if (!res.ok) throw new Error('Erro HTTP ' + res.status);
       const ranking = await res.json();
-      const medalClass = ['rank-1', 'rank-2', 'rank-3'];
+      // Batalha encerrada: só a campeã em destaque, demais apagadas.
       tbody.innerHTML = ranking.map((team, i) => {
-        const cls = i < 3 ? ` class="${medalClass[i]}"` : '';
-        const nameCls = i < 3 ? `<span class="player-name">${team.team_nome}</span>` : team.team_nome;
-        const ptsCls = i < 3 ? `class="prize"` : '';
-        return `<tr${cls}><td><span class="rank-num">${i + 1}</span></td><td>${nameCls}</td><td ${ptsCls}>${team.total_points}</td></tr>`;
+        if (i === 0) {
+          return `<tr class="rank-1 rank-premiado"><td><span class="rank-num">1</span></td><td><span class="player-name">${team.team_nome}</span><span class="player-premio">&#127942; Campe&atilde;</span></td><td class="prize">${team.total_points}</td></tr>`;
+        }
+        return `<tr class="rank-off"><td><span class="rank-num">${i + 1}</span></td><td>${team.team_nome}</td><td>${team.total_points}</td></tr>`;
       }).join('');
     } catch (e) {
       // Falha na atualização mantém o ranking já mostrado; o erro só aparece se não há nada.
